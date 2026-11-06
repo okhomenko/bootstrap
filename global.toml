@@ -1,0 +1,5 @@
+[tools]
+node = "lts"
+python = "3.15"
+bun = "latest"
+java = "corretto-21"
