@@ -1,23 +1,41 @@
 [bootstrap.packages]
-"brew:lazygit" = "latest"
-"brew:tree-sitter-cli" = "latest"
-"brew:gh" = "latest"
-"brew:git" = "latest"
-"brew:neovim" = "latest"
-"brew:fzf" = "latest"
-"brew:fd" = "latest"
-"brew:ripgrep" = "latest"
-"brew:btop" = "latest"
-"brew:herdr" = "latest"
-"brew-cask:kitty" = "latest"
-"brew-cask:1password" = "latest"
-"brew-cask:1password-cli" = "latest"
-"brew-cask:google-chrome" = "latest"
-"brew-cask:chatgpt" = "latest"
-"brew-cask:font-jetbrains-mono-nerd-font" = "latest"
-"brew-cask:sublime-text" = "latest"
-"brew-cask:codex" = "latest"
-"brew-cask:claude-code" = "latest"
+# Native macOS packages; prevent accidental Linuxbrew installation on Arch.
+"brew:lazygit" = { os = "macos" }
+"brew:tree-sitter-cli" = { os = "macos" }
+"brew:gh" = { os = "macos" }
+"brew:git" = { os = "macos" }
+"brew:neovim" = { os = "macos" }
+"brew:fzf" = { os = "macos" }
+"brew:fd" = { os = "macos" }
+"brew:ripgrep" = { os = "macos" }
+"brew:btop" = { os = "macos" }
+"brew:herdr" = { os = "macos" }
+"brew-cask:kitty" = { os = "macos" }
+"brew-cask:1password" = { os = "macos" }
+"brew-cask:1password-cli" = { os = "macos" }
+"brew-cask:google-chrome" = { os = "macos" }
+"brew-cask:chatgpt" = { os = "macos" }
+"brew-cask:font-jetbrains-mono-nerd-font" = { os = "macos" }
+"brew-cask:sublime-text" = { os = "macos" }
+"brew-cask:codex" = { os = "macos" }
+"brew-cask:claude-code" = { os = "macos" }
+
+# Official Arch Linux packages; versions remain managed by pacman.
+"pacman:mise" = { os = "linux" }
+"pacman:git" = { os = "linux" }
+"pacman:gh" = { os = "linux" }
+"pacman:zsh" = { os = "linux" }
+"pacman:curl" = { os = "linux" }
+"pacman:openssh" = { os = "linux" }
+"pacman:kitty" = { os = "linux" }
+"pacman:neovim" = { os = "linux" }
+"pacman:fzf" = { os = "linux" }
+"pacman:fd" = { os = "linux" }
+"pacman:ripgrep" = { os = "linux" }
+"pacman:btop" = { os = "linux" }
+"pacman:lazygit" = { os = "linux" }
+"pacman:tree-sitter-cli" = { os = "linux" }
+"pacman:ttf-jetbrains-mono-nerd" = { os = "linux" }
 
 # An empty answer is not saved, so mise would ask again on every run.
 [vars.private_bootstrap_repo]
@@ -51,6 +69,7 @@ fi
 '''
 
 [dotfiles."~/Library/Application Support/Sublime Text/Packages/User/Package Control.sublime-settings"]
+variants = [{ os = "macos" }]
 content = '''
 {
   "installed_packages": [
@@ -107,13 +126,21 @@ source "$ZSH/oh-my-zsh.sh"
 ''' }
 "~/.zshrc/homebrew-path" = {
   line = 'export PATH="/opt/homebrew/bin:$PATH"',
-  position = "prepend"
+  position = "prepend",
+  variants = [{ os = "macos" }]
 }
 
 "~/.ssh/config/1password-agent" = { block = '''
 Host *
   IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
-''' }
+''', variants = [{ os = "macos" }] }
+
+# 1Password on Linux uses a different SSH agent socket.
+# Install the Linux 1Password application separately before using this agent.
+"~/.ssh/config/1password-agent-linux" = { block = '''
+Host *
+  IdentityAgent "~/.1password/agent.sock"
+''', variants = [{ os = "linux" }] }
 
 # Verify against https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints
 "~/.ssh/known_hosts/github" = { block = '''
@@ -129,7 +156,6 @@ shell_integration no-rc
 
 editor nvim
 kitty_mod ctrl+shift
-modify_font cell_height 6px
 background_opacity 1.0
 dynamic_background_opacity no
 inactive_text_alpha 1.0
@@ -146,9 +172,6 @@ tab_bar_min_tabs 1
 active_tab_font_style bold
 inactive_tab_font_style normal
 tab_title_template "{fmt.fg.red}{bell_symbol}{activity_symbol}{fmt.fg.tab}{tab.last_focused_progress_percent}{custom}"
-
-macos_option_as_alt yes
-hide_window_decorations titlebar-only
 
 map kitty_mod+z toggle_layout stack
 map kitty_mod+h neighboring_window left
