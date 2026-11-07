@@ -1,8 +1,9 @@
 # bootstrap
 
-Sets up a fresh Mac with [`mise bootstrap`](https://mise.jdx.dev/bootstrap.html):
-Homebrew packages and apps, zsh with oh-my-zsh, kitty, Neovim with LazyVim,
-Git defaults, macOS preferences, and runtime tools (Node, Python, Bun, Java).
+Sets up macOS and Arch Linux with [`mise bootstrap`](https://mise.jdx.dev/bootstrap.html):
+Homebrew on macOS, pacman on Arch, zsh with oh-my-zsh, kitty, Neovim with
+LazyVim, Git defaults, and runtime tools (Node, Python, Bun, Java).
+macOS-only preferences stay on macOS.
 
 The repository holds no identity, credentials, or host details. Those come from
 an optional private stage, described below.
@@ -40,6 +41,60 @@ mise keeps its checkout of this repository in
 linked to `~/.config/mise/conf.d/bootstrap.toml`, so it applies in every
 directory.
 
+## Set up Arch Linux
+
+The same repository supports Arch; mise selects pacman packages on Linux and
+Homebrew packages on macOS. The Arch package list uses the official repositories
+and leaves all upgrades to pacman, not mise's runtime tool installer.
+
+1. Install just the bootstrap prerequisites as your normal user:
+
+   ```sh
+   sudo pacman -Syu
+   sudo pacman -S --needed mise git zsh
+   ```
+
+2. Run the existing public bootstrap:
+
+   ```sh
+   mise bootstrap --from https://github.com/okhomenko/bootstrap.git --prompt-vars
+   ```
+
+3. Open a new zsh session and verify:
+
+   ```sh
+   command -v mise gh git kitty nvim
+   mise doctor
+   mise bootstrap packages status
+   ```
+
+The Arch setup includes native packages such as `gh`, `kitty`, `lazygit`,
+`neovim`, `fzf`, `fd`, `ripgrep`, `btop`, `tree-sitter-cli`, and the
+JetBrains Mono Nerd font. It uses the existing `kitty/linux.conf`, Git
+configuration, Oh My Zsh, LazyVim, and the global runtime configuration.
+
+Apps not in Arch's official repositories (such as 1Password, its CLI, Google
+Chrome, and Sublime Text) are deliberately not installed through Linuxbrew.
+Install those separately using your preferred trusted Arch/AUR workflow.
+
+**SSH agent:** unlike macOS, the public Arch bootstrap does not enable the
+1Password SSH agent by default. After installing and enabling the 1Password
+desktop application, you can opt in to its Linux agent configuration with
+`mise -E 1password bootstrap --from https://github.com/okhomenko/bootstrap.git`.
+Without this opt-in your existing SSH agent configuration remains in effect.
+
+### If a previous bootstrap attempted Linuxbrew
+
+Cancel the Homebrew prompt and run the updated bootstrap with `--update`;
+existing bootstraps retain their previous checkout until explicitly updated:
+
+```sh
+mise bootstrap --from https://github.com/okhomenko/bootstrap.git --update
+```
+
+Preview planned native packages with `mise bootstrap packages apply --dry-run`
+before approving installations.
+
 ## Update
 
 ```sh
@@ -70,10 +125,9 @@ example:
   in every directory.
 - SSH hosts as a block in `~/.ssh/config`.
 
-For an SSH URL such as `git@github.com:you/private.git`, the first clone goes
-through the 1Password SSH agent, so no GitHub token is stored. The bootstrap
-installs 1Password in the same run, so on a brand-new Mac the first run stops
-at this step. Then:
+For an SSH URL such as `git@github.com:you/private.git`, Git authenticates
+through your configured SSH agent. On a fresh Mac, the bootstrap installs
+1Password in the same run, so private stage access may initially fail. Then:
 
 1. Sign in to the 1Password app.
 2. Turn on its SSH agent (Settings > Developer).
@@ -96,7 +150,7 @@ mise vars unset private_bootstrap_repo   # ask again on the next --prompt-vars r
 
 ## Scope
 
-Use this on Macs where nothing else manages the same files, such as Home
-Manager. Git reads both `~/.gitconfig` and `~/.config/git/config`, and a
+Use this on macOS or Arch Linux where nothing else manages the same files,
+such as Home Manager. Git reads both `~/.gitconfig` and `~/.config/git/config`, and a
 `~/.config/mise/config.toml` overrides the files in `~/.config/mise/conf.d/`.
 `mise config ls` lists the config files mise loads, lowest precedence first.
