@@ -8,6 +8,20 @@ macOS-only preferences stay on macOS.
 The repository holds no identity, credentials, or host details. Those come from
 an optional private stage, described below.
 
+## Repository layout
+
+```text
+bootstrap/
+├── .miserc.toml       # auto_env = true
+├── mise.toml          # shared dotfiles, repositories, bootstrap task
+├── mise.macos.toml    # Homebrew, Apple settings, macOS-specific files
+├── mise.linux.toml    # pacman packages, Linux-specific files
+└── global.toml        # Node, Python, Bun, Java (linked globally)
+```
+
+Platform files are activated automatically by mise's `auto_env` setting.
+Packages for one OS are never evaluated as part of the other OS's setup.
+
 ## Set up a Mac
 
 1. Install the Xcode Command Line Tools and wait for the installer to finish.
@@ -43,9 +57,10 @@ directory.
 
 ## Set up Arch Linux
 
-The same repository supports Arch; mise selects pacman packages on Linux and
-Homebrew packages on macOS. The Arch package list uses the official repositories
-and leaves all upgrades to pacman, not mise's runtime tool installer.
+The same repository supports Arch; mise selects `mise.linux.toml` on Arch and `mise.macos.toml` on macOS.
+The shared `mise.toml` contains dotfiles, repositories, and bootstrap tasks. The Arch package list uses official repositories; pacman owns native package
+versions and upgrades. The repository's `.miserc.toml` enables automatic
+platform environments.
 
 1. Install just the bootstrap prerequisites as your normal user:
 
@@ -77,11 +92,10 @@ Apps not in Arch's official repositories (such as 1Password, its CLI, Google
 Chrome, and Sublime Text) are deliberately not installed through Linuxbrew.
 Install those separately using your preferred trusted Arch/AUR workflow.
 
-**SSH agent:** unlike macOS, the public Arch bootstrap does not enable the
-1Password SSH agent by default. After installing and enabling the 1Password
-desktop application, you can opt in to its Linux agent configuration with
-`mise -E 1password bootstrap --from https://github.com/okhomenko/bootstrap.git`.
-Without this opt-in your existing SSH agent configuration remains in effect.
+**SSH agent:** unlike macOS, the public Arch bootstrap does not configure a
+1Password SSH agent. Keep your existing SSH configuration until 1Password is
+installed and its Linux socket is working. If you use 1Password later, the
+Linux socket is `~/.1password/agent.sock`.
 
 ### If a previous bootstrap attempted Linuxbrew
 
