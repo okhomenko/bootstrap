@@ -1,6 +1,7 @@
 [bootstrap.packages]
 "pacman:mise" = "latest"
 "pacman:git" = "latest"
+"pacman:base-devel" = "latest"
 "pacman:gh" = "latest"
 "pacman:zsh" = "latest"
 "pacman:curl" = "latest"
@@ -14,6 +15,10 @@
 "pacman:lazygit" = "latest"
 "pacman:tree-sitter-cli" = "latest"
 "pacman:ttf-jetbrains-mono-nerd" = "latest"
+
+# AUR packages require paru or yay and base-devel.
+"aur:1password" = "latest"
+"aur:1password-cli" = "latest"
 
 [dotfiles]
 "~/.config/kitty/linux.conf" = { content = '''
