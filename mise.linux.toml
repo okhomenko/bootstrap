@@ -36,6 +36,10 @@ if ! command -v yay >/dev/null 2>&1 && ! command -v paru >/dev/null 2>&1; then
 fi
 
 # Verify the publisher's documented fingerprint before importing the key.
+# On minimal images these two commands may not be installed yet.
+if ! command -v curl >/dev/null 2>&1 || ! command -v gpg >/dev/null 2>&1; then
+  sudo pacman -S --needed curl gnupg
+fi
 fingerprint="3FEF9748469ADBE15DA7CA80AC2D62742012EA22"
 if ! gpg --list-keys --with-colons "$fingerprint" 2>/dev/null |
     grep -Fq "fpr:::::::::$fingerprint:"; then
