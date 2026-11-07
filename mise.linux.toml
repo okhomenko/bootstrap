@@ -24,7 +24,7 @@ if ! command -v yay >/dev/null 2>&1 && ! command -v paru >/dev/null 2>&1; then
   git clone --depth 1 https://aur.archlinux.org/yay.git "$work_dir/yay"
 
   echo "Review the yay AUR build recipe before continuing:"
-  cat "$build_dir/yay/PKGBUILD"
+  cat "$work_dir/yay/PKGBUILD"
   printf '\nBuild and install yay? [y/N] '
   IFS= read -r answer
   case "$answer" in
