@@ -47,6 +47,12 @@ ZSH_THEME="robbyrussell"
 plugins=(git fzf)
 
 source "$ZSH/oh-my-zsh.sh"
+
+# Same SSH indicator as the old home repository; shown only in remote sessions.
+if [ -n "${SSH_CONNECTION:-}${SSH_TTY:-}" ] && [ -z "${_HOME_SSH_PROMPT_MARKER:-}" ]; then
+  _HOME_SSH_PROMPT_MARKER=1
+  PROMPT="%F{red}[SSH:%F{yellow}%n%F{white}@%F{cyan}%m%F{red}]%f $PROMPT"
+fi
 ''' }
 # Verify against https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints
 "~/.ssh/known_hosts/github" = { block = '''
