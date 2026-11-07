@@ -64,7 +64,7 @@ fi
 "pacman:mise" = "latest"
 "pacman:git" = "latest"
 "pacman:base-devel" = "latest"
-"pacman:gh" = "latest"
+"pacman:github-cli" = "latest"
 "pacman:zsh" = "latest"
 "pacman:curl" = "latest"
 "pacman:openssh" = "latest"
