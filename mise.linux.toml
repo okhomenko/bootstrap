@@ -19,9 +19,9 @@ if ! command -v yay >/dev/null 2>&1 && ! command -v paru >/dev/null 2>&1; then
 
   sudo pacman -S --needed git base-devel
 
-  build_dir="$(mktemp -d)"
-  trap 'rm -rf "$build_dir"' EXIT HUP INT TERM
-  git clone --depth 1 https://aur.archlinux.org/yay.git "$build_dir/yay"
+  work_dir="${work_dir:-$(mktemp -d)}"
+  trap 'rm -rf "$work_dir"' EXIT HUP INT TERM
+  git clone --depth 1 https://aur.archlinux.org/yay.git "$work_dir/yay"
 
   echo "Review the yay AUR build recipe before continuing:"
   cat "$build_dir/yay/PKGBUILD"
@@ -32,15 +32,18 @@ if ! command -v yay >/dev/null 2>&1 && ! command -v paru >/dev/null 2>&1; then
     *) echo "Canceled yay installation." >&2; exit 1 ;;
   esac
 
-  (cd "$build_dir/yay" && makepkg -si)
+  (cd "$work_dir/yay" && makepkg -si)
 fi
 
 # Verify the publisher's documented fingerprint before importing the key.
 fingerprint="3FEF9748469ADBE15DA7CA80AC2D62742012EA22"
 if ! gpg --list-keys --with-colons "$fingerprint" 2>/dev/null |
     grep -Fq "fpr:::::::::$fingerprint:"; then
-  key_file="$(mktemp)"
-  trap 'rm -f "$key_file"' EXIT HUP INT TERM
+  if [ -z "${work_dir:-}" ]; then
+    work_dir="$(mktemp -d)"
+    trap 'rm -rf "$work_dir"' EXIT HUP INT TERM
+  fi
+  key_file="$work_dir/1password.asc"
   curl -fsSL https://downloads.1password.com/linux/keys/1password.asc > "$key_file"
 
   if ! gpg --show-keys --with-colons "$key_file" |
