@@ -62,23 +62,47 @@ The shared `mise.toml` contains dotfiles, repositories, and bootstrap tasks. The
 versions and upgrades. The repository's `.miserc.toml` enables automatic
 platform environments.
 
-1. Install just the bootstrap prerequisites as your normal user:
+1. Install the bootstrap prerequisites as your regular user (sudo is only
+   used to install pacman packages):
 
    ```sh
    sudo pacman -Syu
-   sudo pacman -S --needed mise git zsh
+   sudo pacman -S --needed mise git zsh base-devel
    ```
 
-2. Run the existing public bootstrap:
+2. Install an AUR helper if neither `paru` nor `yay` is available. This is
+   a one-time machine preparation step; build it as your regular user, **not**
+   using `sudo makepkg`:
+
+   ```sh
+   if ! command -v paru >/dev/null 2>&1 && ! command -v yay >/dev/null 2>&1; then
+     mkdir -p ~/code
+     git clone https://aur.archlinux.org/paru.git ~/code/paru
+     (cd ~/code/paru && makepkg -si)
+   fi
+   ```
+
+   Review the AUR PKGBUILD before the first install or any upgrade. The
+   bootstrap AUR manager uses `--noconfirm` and does not prompt to inspect
+   PKGBUILD changes.
+
+3. Import 1Password's signing key for its AUR package:
+
+   ```sh
+   curl -sS https://downloads.1password.com/linux/keys/1password.asc | gpg --import
+   ```
+
+4. Run the public bootstrap:
 
    ```sh
    mise bootstrap --from https://github.com/okhomenko/bootstrap.git --prompt-vars
    ```
 
-3. Open a new zsh session and verify:
+5. Open a new zsh session and verify:
 
    ```sh
-   command -v mise gh git kitty nvim
+   command -v mise gh git kitty nvim op 1password
+   pacman -Q 1password 1password-cli
    mise doctor
    mise bootstrap packages status
    ```
@@ -88,9 +112,11 @@ The Arch setup includes native packages such as `gh`, `kitty`, `lazygit`,
 JetBrains Mono Nerd font. It uses the existing `kitty/linux.conf`, Git
 configuration, Oh My Zsh, LazyVim, and the global runtime configuration.
 
-Apps not in Arch's official repositories (such as 1Password, its CLI, Google
-Chrome, and Sublime Text) are deliberately not installed through Linuxbrew.
-Install those separately using your preferred trusted Arch/AUR workflow.
+1Password Desktop (`1password`) and its CLI (`1password-cli`, binary `op`)
+are installed from AUR, not Linuxbrew. Both are installed system-wide via
+pacman after the AUR helper builds them under your normal account. 1Password
+vaults, logins, and SSH agent state remain per user. Other optional apps (such
+as Chrome and Sublime Text) are not installed by this Arch configuration.
 
 **SSH agent:** unlike macOS, the public Arch bootstrap does not configure a
 1Password SSH agent. Keep your existing SSH configuration until 1Password is
