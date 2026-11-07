@@ -1,3 +1,43 @@
+# Bootstrap an AUR helper before mise processes aur: package entries.
+# Keep the resulting yay package under pacman ownership, not under mise [tools].
+[bootstrap.hooks.pre-packages]
+description = "Install yay if no AUR helper is available"
+run = '''
+#!/bin/sh
+set -eu
+
+if command -v yay >/dev/null 2>&1 || command -v paru >/dev/null 2>&1; then
+  exit 0
+fi
+
+if [ "$(id -u)" -eq 0 ]; then
+  echo "Run mise bootstrap as a regular user, not root." >&2
+  exit 1
+fi
+
+if [ ! -t 0 ]; then
+  echo "Initial yay bootstrap requires an interactive terminal to review its PKGBUILD." >&2
+  exit 1
+fi
+
+sudo pacman -S --needed git base-devel
+
+build_dir="$(mktemp -d)"
+trap 'rm -rf "$build_dir"' EXIT HUP INT TERM
+git clone --depth 1 https://aur.archlinux.org/yay.git "$build_dir/yay"
+
+echo "Review the yay AUR build recipe before continuing:"
+cat "$build_dir/yay/PKGBUILD"
+printf '\nBuild and install yay? [y/N] '
+IFS= read -r answer
+case "$answer" in
+  y|Y|yes|YES|Yes) ;;
+  *) echo "Canceled yay installation." >&2; exit 1 ;;
+esac
+
+(cd "$build_dir/yay" && makepkg -si)
+'''
+
 [bootstrap.packages]
 "pacman:mise" = "latest"
 "pacman:git" = "latest"
