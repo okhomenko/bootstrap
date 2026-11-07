@@ -1,64 +1,7 @@
-[bootstrap.packages]
-"brew:lazygit" = "latest"
-"brew:tree-sitter-cli" = "latest"
-"brew:gh" = "latest"
-"brew:git" = "latest"
-"brew:neovim" = "latest"
-"brew:fzf" = "latest"
-"brew:fd" = "latest"
-"brew:ripgrep" = "latest"
-"brew:btop" = "latest"
-"brew:herdr" = "latest"
-"brew-cask:kitty" = "latest"
-"brew-cask:1password" = "latest"
-"brew-cask:1password-cli" = "latest"
-"brew-cask:google-chrome" = "latest"
-"brew-cask:chatgpt" = "latest"
-"brew-cask:font-jetbrains-mono-nerd-font" = "latest"
-"brew-cask:sublime-text" = "latest"
-"brew-cask:codex" = "latest"
-"brew-cask:claude-code" = "latest"
-
 # An empty answer is not saved, so mise would ask again on every run.
 [vars.private_bootstrap_repo]
 default = "skip"
 prompt = "Private bootstrap repository URL (skip = none)"
-
-[bootstrap.hooks.pre-packages]
-description = "Ensure Apple Command Line Tools are installed"
-run = '''
-if [ "$(uname -s)" = "Darwin" ] && \
-   ! xcode-select -p >/dev/null 2>&1; then
-  xcode-select --install
-  echo "Complete installation, then rerun mise bootstrap"
-  exit 1
-fi
-'''
-
-[bootstrap.hooks.post-packages]
-description = "Install Sublime Text Package Control"
-run = '''
-if [ "$(uname -s)" = "Darwin" ]; then
-  target="$HOME/Library/Application Support/Sublime Text/Installed Packages/Package Control.sublime-package"
-
-  if [ ! -s "$target" ]; then
-    mkdir -p "$(dirname "$target")"
-    curl -fsSL --retry 3 \
-      "https://download.sublimetext.com/Package%20Control.sublime-package" \
-      -o "$target"
-  fi
-fi
-'''
-
-[dotfiles."~/Library/Application Support/Sublime Text/Packages/User/Package Control.sublime-settings"]
-content = '''
-{
-  "installed_packages": [
-    "Package Control",
-    "JsFormat"
-  ]
-}
-'''
 
 [tasks.bootstrap]
 description = "Initialize LazyVim, then apply the private stage if one is configured"
@@ -105,16 +48,6 @@ plugins=(git fzf)
 
 source "$ZSH/oh-my-zsh.sh"
 ''' }
-"~/.zshrc/homebrew-path" = {
-  line = 'export PATH="/opt/homebrew/bin:$PATH"',
-  position = "prepend"
-}
-
-"~/.ssh/config/1password-agent" = { block = '''
-Host *
-  IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
-''' }
-
 # Verify against https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints
 "~/.ssh/known_hosts/github" = { block = '''
 github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
@@ -129,7 +62,6 @@ shell_integration no-rc
 
 editor nvim
 kitty_mod ctrl+shift
-modify_font cell_height 6px
 background_opacity 1.0
 dynamic_background_opacity no
 inactive_text_alpha 1.0
@@ -147,9 +79,6 @@ active_tab_font_style bold
 inactive_tab_font_style normal
 tab_title_template "{fmt.fg.red}{bell_symbol}{activity_symbol}{fmt.fg.tab}{tab.last_focused_progress_percent}{custom}"
 
-macos_option_as_alt yes
-hide_window_decorations titlebar-only
-
 map kitty_mod+z toggle_layout stack
 map kitty_mod+h neighboring_window left
 map kitty_mod+j neighboring_window down
@@ -164,38 +93,6 @@ map kitty_mod+backslash combine : goto_layout splits : launch --cwd=current --lo
 # Platform-specific configuration
 include ${KITTY_OS}.conf
 ''' }
-"~/.config/kitty/macos.conf" = { content = '''
-macos_option_as_alt yes
-hide_window_decorations titlebar-only
-modify_font cell_height 6px
-
-map cmd+1 goto_tab 1
-map cmd+2 goto_tab 2
-map cmd+3 goto_tab 3
-map cmd+4 goto_tab 4
-map cmd+5 goto_tab 5
-map cmd+6 goto_tab 6
-map cmd+7 goto_tab 7
-map cmd+8 goto_tab 8
-map cmd+9 goto_tab 9
-''', variants = [{ os = "macos" }] }
-
-"~/.config/kitty/linux.conf" = { content = '''
-hide_window_decorations yes
-modify_font cell_height 105%
-font_size 12
-
-map ctrl+alt+1 goto_tab 1
-map ctrl+alt+2 goto_tab 2
-map ctrl+alt+3 goto_tab 3
-map ctrl+alt+4 goto_tab 4
-map ctrl+alt+5 goto_tab 5
-map ctrl+alt+6 goto_tab 6
-map ctrl+alt+7 goto_tab 7
-map ctrl+alt+8 goto_tab 8
-map ctrl+alt+9 goto_tab 9
-''', variants = [{ os = "linux" }] }
-
 "~/.config/kitty/tab_bar.py" = { content = '''
 def draw_title(data):
     title = str(data.get("title", ""))
@@ -247,60 +144,3 @@ def draw_title(data):
 [bootstrap.mise_shell_activate]
 zsh = true
 
-[bootstrap.macos.dock]
-autohide = true
-autohide_delay = 0.0
-autohide_time_modifier = 0.0
-magnification = false
-
-[bootstrap.macos.keyboard]
-automatic_spelling_correction = false
-
-[bootstrap.macos.defaults.NSGlobalDomain]
-NSAutomaticWindowAnimationsEnabled = false
-NSWindowResizeTime = 0.001
-NSScrollAnimationEnabled = false
-QLPanelAnimationDuration = 0.0
-
-[bootstrap.macos.defaults."com.apple.universalaccess"]
-reduceMotion = true
-
-[bootstrap.macos.defaults."com.apple.Safari"]
-ShowStatusBar = true
-ShowFullURLInSmartSearchField = true
-IncludeDevelopMenu = true
-WebAutomaticSpellingCorrectionEnabled = false
-WebContinuousSpellCheckingEnabled = false
-WebAutomaticTextReplacementEnabled = false
-
-
-[bootstrap.macos.defaults."com.apple.dock"]
-launchanim = false
-expose-animation-duration = 0.1
-
-[bootstrap.macos.defaults."com.apple.finder"]
-DisableAllAnimations = true
-
-[tasks.battery-saver]
-description = "Optimize macOS battery power settings"
-run = '''
-#!/bin/sh
-set -eu
-
-if [ "$(uname -s)" != "Darwin" ]; then
-  exit 0
-fi
-
-# Turn display off after 5 minutes on battery.
-# Slightly dim the display when unplugged.
-sudo pmset -b displaysleep 5 lessbright 1
-'''
-
-[bootstrap.macos.launchd.agents.caps-to-esc]
-program = "/usr/bin/hidutil"
-args = [
-  "property",
-  "--set",
-  '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":30064771129,"HIDKeyboardModifierMappingDst":30064771113}]}'
-]
-run_at_load = true

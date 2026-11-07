@@ -1,0 +1,151 @@
+[bootstrap.packages]
+"brew:lazygit" = "latest"
+"brew:tree-sitter-cli" = "latest"
+"brew:gh" = "latest"
+"brew:git" = "latest"
+"brew:neovim" = "latest"
+"brew:fzf" = "latest"
+"brew:fd" = "latest"
+"brew:ripgrep" = "latest"
+"brew:btop" = "latest"
+"brew:herdr" = "latest"
+"brew-cask:kitty" = "latest"
+"brew-cask:1password" = "latest"
+"brew-cask:1password-cli" = "latest"
+"brew-cask:google-chrome" = "latest"
+"brew-cask:chatgpt" = "latest"
+"brew-cask:font-jetbrains-mono-nerd-font" = "latest"
+"brew-cask:sublime-text" = "latest"
+"brew-cask:codex" = "latest"
+"brew-cask:claude-code" = "latest"
+
+[bootstrap.hooks.pre-packages]
+description = "Ensure Apple Command Line Tools are installed"
+run = '''
+if [ "$(uname -s)" = "Darwin" ] && \
+   ! xcode-select -p >/dev/null 2>&1; then
+  xcode-select --install
+  echo "Complete installation, then rerun mise bootstrap"
+  exit 1
+fi
+'''
+
+[bootstrap.hooks.post-packages]
+description = "Install Sublime Text Package Control"
+run = '''
+if [ "$(uname -s)" = "Darwin" ]; then
+  target="$HOME/Library/Application Support/Sublime Text/Installed Packages/Package Control.sublime-package"
+
+  if [ ! -s "$target" ]; then
+    mkdir -p "$(dirname "$target")"
+    curl -fsSL --retry 3 \
+      "https://download.sublimetext.com/Package%20Control.sublime-package" \
+      -o "$target"
+  fi
+fi
+'''
+
+[dotfiles."~/Library/Application Support/Sublime Text/Packages/User/Package Control.sublime-settings"]
+content = '''
+{
+  "installed_packages": [
+    "Package Control",
+    "JsFormat"
+  ]
+}
+'''
+
+[dotfiles]
+"~/.zshrc/homebrew-path" = {
+  line = 'export PATH="/opt/homebrew/bin:$PATH"',
+  position = "prepend"
+}
+
+"~/.ssh/config/1password-agent" = { block = '''
+Host *
+  IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+''' }
+
+"~/.config/kitty/macos.conf" = { content = '''
+macos_option_as_alt yes
+hide_window_decorations titlebar-only
+modify_font cell_height 6px
+
+map cmd+1 goto_tab 1
+map cmd+2 goto_tab 2
+map cmd+3 goto_tab 3
+map cmd+4 goto_tab 4
+map cmd+5 goto_tab 5
+map cmd+6 goto_tab 6
+map cmd+7 goto_tab 7
+map cmd+8 goto_tab 8
+map cmd+9 goto_tab 9
+''' }
+
+[dotfiles."~/Library/Application Support/Sublime Text/Packages/User/Package Control.sublime-settings"]
+content = '''
+{
+  "installed_packages": [
+    "Package Control",
+    "JsFormat"
+  ]
+}
+'''
+
+[bootstrap.macos.dock]
+autohide = true
+autohide_delay = 0.0
+autohide_time_modifier = 0.0
+magnification = false
+
+[bootstrap.macos.keyboard]
+automatic_spelling_correction = false
+
+[bootstrap.macos.defaults.NSGlobalDomain]
+NSAutomaticWindowAnimationsEnabled = false
+NSWindowResizeTime = 0.001
+NSScrollAnimationEnabled = false
+QLPanelAnimationDuration = 0.0
+
+[bootstrap.macos.defaults."com.apple.universalaccess"]
+reduceMotion = true
+
+[bootstrap.macos.defaults."com.apple.Safari"]
+ShowStatusBar = true
+ShowFullURLInSmartSearchField = true
+IncludeDevelopMenu = true
+WebAutomaticSpellingCorrectionEnabled = false
+WebContinuousSpellCheckingEnabled = false
+WebAutomaticTextReplacementEnabled = false
+
+
+[bootstrap.macos.defaults."com.apple.dock"]
+launchanim = false
+expose-animation-duration = 0.1
+
+[bootstrap.macos.defaults."com.apple.finder"]
+DisableAllAnimations = true
+
+[tasks.battery-saver]
+description = "Optimize macOS battery power settings"
+run = '''
+#!/bin/sh
+set -eu
+
+if [ "$(uname -s)" != "Darwin" ]; then
+  exit 0
+fi
+
+# Turn display off after 5 minutes on battery.
+# Slightly dim the display when unplugged.
+sudo pmset -b displaysleep 5 lessbright 1
+'''
+
+[bootstrap.macos.launchd.agents.caps-to-esc]
+program = "/usr/bin/hidutil"
+args = [
+  "property",
+  "--set",
+  '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":30064771129,"HIDKeyboardModifierMappingDst":30064771113}]}'
+]
+run_at_load = true

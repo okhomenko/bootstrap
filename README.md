@@ -1,11 +1,26 @@
 # bootstrap
 
-Sets up a fresh Mac with [`mise bootstrap`](https://mise.jdx.dev/bootstrap.html):
-Homebrew packages and apps, zsh with oh-my-zsh, kitty, Neovim with LazyVim,
-Git defaults, macOS preferences, and runtime tools (Node, Python, Bun, Java).
+Sets up macOS and Arch Linux with [`mise bootstrap`](https://mise.jdx.dev/bootstrap.html):
+Homebrew on macOS, pacman on Arch, zsh with oh-my-zsh, kitty, Neovim with
+LazyVim, Git defaults, and runtime tools (Node, Python, Bun, Java).
+macOS-only preferences stay on macOS.
 
 The repository holds no identity, credentials, or host details. Those come from
 an optional private stage, described below.
+
+## Repository layout
+
+```text
+bootstrap/
+├── .miserc.toml       # auto_env = true
+├── mise.toml          # shared dotfiles, repositories, bootstrap task
+├── mise.macos.toml    # Homebrew, Apple settings, macOS-specific files
+├── mise.linux.toml    # pacman packages, Linux-specific files
+└── global.toml        # Node, Python, Bun, Java (linked globally)
+```
+
+Platform files are activated automatically by mise's `auto_env` setting.
+Packages for one OS are never evaluated as part of the other OS's setup.
 
 ## Set up a Mac
 
@@ -40,6 +55,74 @@ mise keeps its checkout of this repository in
 linked to `~/.config/mise/conf.d/bootstrap.toml`, so it applies in every
 directory.
 
+## Set up Arch Linux
+
+The same repository supports Arch; mise selects `mise.linux.toml` on Arch and `mise.macos.toml` on macOS.
+The shared `mise.toml` contains dotfiles, repositories, and bootstrap tasks. The Arch package list uses official repositories; pacman owns native package
+versions and upgrades. The repository's `.miserc.toml` enables automatic
+platform environments.
+
+1. Install only the minimal bootstrap prerequisites:
+
+   ```sh
+   sudo pacman -Syu
+   sudo pacman -S --needed mise git zsh
+   ```
+
+2. Run the public bootstrap as your regular user:
+
+   ```sh
+   mise bootstrap --from https://github.com/okhomenko/bootstrap.git --prompt-vars
+   ```
+
+   On a fresh Arch installation, the Linux `pre-packages` hook installs
+   `base-devel`, downloads the `yay` AUR build recipe, shows the PKGBUILD,
+   and requests approval before building and installing `yay`. The hook also
+   verifies and imports the official 1Password signing key. If `yay` or
+   `paru` already exists, the AUR-helper installation is skipped. After the
+   hook, the normal `mise` package phase installs system packages with
+   `pacman` and 1Password packages with the AUR helper.
+
+3. Open a new zsh session and verify:
+
+   ```sh
+   command -v mise gh git kitty nvim op 1password
+   pacman -Q yay 1password 1password-cli
+   mise doctor
+   mise bootstrap packages status
+   ```
+
+   If the system uses `paru` rather than `yay`, check `pacman -Q paru`
+   instead.
+
+The Arch setup includes native packages such as `gh`, `kitty`, `lazygit`,
+`neovim`, `fzf`, `fd`, `ripgrep`, `btop`, `tree-sitter-cli`, and the
+JetBrains Mono Nerd font. It uses the existing `kitty/linux.conf`, Git
+configuration, Oh My Zsh, LazyVim, and the global runtime configuration.
+
+1Password Desktop (`1password`) and its CLI (`1password-cli`, binary `op`)
+are installed from AUR, not Linuxbrew. Both are installed system-wide via
+pacman after the AUR helper builds them under your normal account. 1Password
+vaults, logins, and SSH agent state remain per user. Other optional apps (such
+as Chrome and Sublime Text) are not installed by this Arch configuration.
+
+**SSH agent:** unlike macOS, the public Arch bootstrap does not configure a
+1Password SSH agent. Keep your existing SSH configuration until 1Password is
+installed and its Linux socket is working. If you use 1Password later, the
+Linux socket is `~/.1password/agent.sock`.
+
+### If a previous bootstrap attempted Linuxbrew
+
+Cancel the Homebrew prompt and run the updated bootstrap with `--update`;
+existing bootstraps retain their previous checkout until explicitly updated:
+
+```sh
+mise bootstrap --from https://github.com/okhomenko/bootstrap.git --update
+```
+
+Preview planned native packages with `mise bootstrap packages apply --dry-run`
+before approving installations.
+
 ## Update
 
 ```sh
@@ -70,10 +153,9 @@ example:
   in every directory.
 - SSH hosts as a block in `~/.ssh/config`.
 
-For an SSH URL such as `git@github.com:you/private.git`, the first clone goes
-through the 1Password SSH agent, so no GitHub token is stored. The bootstrap
-installs 1Password in the same run, so on a brand-new Mac the first run stops
-at this step. Then:
+For an SSH URL such as `git@github.com:you/private.git`, Git authenticates
+through your configured SSH agent. On a fresh Mac, the bootstrap installs
+1Password in the same run, so private stage access may initially fail. Then:
 
 1. Sign in to the 1Password app.
 2. Turn on its SSH agent (Settings > Developer).
@@ -96,7 +178,7 @@ mise vars unset private_bootstrap_repo   # ask again on the next --prompt-vars r
 
 ## Scope
 
-Use this on Macs where nothing else manages the same files, such as Home
-Manager. Git reads both `~/.gitconfig` and `~/.config/git/config`, and a
+Use this on macOS or Arch Linux where nothing else manages the same files,
+such as Home Manager. Git reads both `~/.gitconfig` and `~/.config/git/config`, and a
 `~/.config/mise/config.toml` overrides the files in `~/.config/mise/conf.d/`.
 `mise config ls` lists the config files mise loads, lowest precedence first.
