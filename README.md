@@ -62,50 +62,38 @@ The shared `mise.toml` contains dotfiles, repositories, and bootstrap tasks. The
 versions and upgrades. The repository's `.miserc.toml` enables automatic
 platform environments.
 
-1. Install the bootstrap prerequisites as your regular user (sudo is only
-   used to install pacman packages):
+1. Install only the minimal bootstrap prerequisites:
 
    ```sh
    sudo pacman -Syu
-   sudo pacman -S --needed mise git zsh base-devel
+   sudo pacman -S --needed mise git zsh
    ```
 
-2. Install an AUR helper if neither `paru` nor `yay` is available. This is
-   a one-time machine preparation step; build it as your regular user, **not**
-   using `sudo makepkg`:
-
-   ```sh
-   if ! command -v paru >/dev/null 2>&1 && ! command -v yay >/dev/null 2>&1; then
-     mkdir -p ~/code
-     git clone https://aur.archlinux.org/paru.git ~/code/paru
-     (cd ~/code/paru && makepkg -si)
-   fi
-   ```
-
-   Review the AUR PKGBUILD before the first install or any upgrade. The
-   bootstrap AUR manager uses `--noconfirm` and does not prompt to inspect
-   PKGBUILD changes.
-
-3. Import 1Password's signing key for its AUR package:
-
-   ```sh
-   curl -sS https://downloads.1password.com/linux/keys/1password.asc | gpg --import
-   ```
-
-4. Run the public bootstrap:
+2. Run the public bootstrap as your regular user:
 
    ```sh
    mise bootstrap --from https://github.com/okhomenko/bootstrap.git --prompt-vars
    ```
 
-5. Open a new zsh session and verify:
+   On a fresh Arch installation, the Linux `pre-packages` hook installs
+   `base-devel`, downloads the `yay` AUR build recipe, shows the PKGBUILD,
+   and requests approval before building and installing `yay`. The hook also
+   verifies and imports the official 1Password signing key. If `yay` or
+   `paru` already exists, the AUR-helper installation is skipped. After the
+   hook, the normal `mise` package phase installs system packages with
+   `pacman` and 1Password packages with the AUR helper.
+
+3. Open a new zsh session and verify:
 
    ```sh
    command -v mise gh git kitty nvim op 1password
-   pacman -Q 1password 1password-cli
+   pacman -Q yay 1password 1password-cli
    mise doctor
    mise bootstrap packages status
    ```
+
+   If the system uses `paru` rather than `yay`, check `pacman -Q paru`
+   instead.
 
 The Arch setup includes native packages such as `gh`, `kitty`, `lazygit`,
 `neovim`, `fzf`, `fd`, `ripgrep`, `btop`, `tree-sitter-cli`, and the
