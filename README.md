@@ -91,6 +91,24 @@ This installs Homebrew packages and casks (including 1Password, Kitty, and devel
 
 This applies shared dotfiles, runtimes, LazyVim, macOS user defaults, LaunchAgents, and Sublime Text Package Control. The Sublime setup hook runs after the `dotfiles` phase, not the system package phase. Start a new login session afterwards.
 
+## GitHub CLI authentication
+
+GitHub CLI is installed by the **system** bootstrap: `github-cli` on Arch or `gh` through Homebrew on macOS. Each user authenticates once through GitHub CLI's standard OAuth browser/device flow:
+
+~~~sh
+gh auth login --hostname github.com --web --git-protocol https
+gh auth status
+gh api user --jq .login
+~~~
+
+On an SSH-only machine, use the URL/device code shown in the terminal in a browser on another machine. No fine-grained PAT or 1Password service-account token is required.
+
+The shared `~/.gitconfig` always configures GitHub HTTPS hosts to use `gh auth git-credential`, so Git cloning, fetching, pushing, and subsequent public/private bootstrap runs reuse the same user login. This is declarative and is not lost when bootstrap regenerates Git configuration.
+
+One GitHub OAuth login can cover repositories in multiple organizations, subject to each organization's GitHub CLI OAuth app approvals and SSO requirements. Verify access individually with `gh repo view ORG/REPO`. The token may be stored in plaintext by GitHub CLI when no supported credential store is available; use `gh auth status` to inspect storage.
+
+Do not call `gh auth logout` as part of bootstrap: it would remove the required login. Do not set an old `GH_TOKEN` or `GITHUB_TOKEN` globally, as these override the native login.
+
 ## Update, preview, and scope
 
 ~~~sh
