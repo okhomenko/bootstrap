@@ -25,9 +25,9 @@ if [ ! -d "$dir/.git" ] && ! GIT_TERMINAL_PROMPT=0 \
     git ls-remote --exit-code "$url" HEAD >/dev/null; then
   cat >&2 <<EOF
 Cannot read $url.
-For an SSH URL, check that the 1Password app is unlocked, its SSH agent is
-turned on (Settings > Developer), and the SSH key for the GitHub account that
-can read the repository is in a vault the agent offers. Then rerun bootstrap.
+For HTTPS, run gh auth login and verify the GitHub CLI credential helper works.
+For SSH, configure an SSH key and agent with access to the repository.
+Then rerun bootstrap.
 EOF
   exit 1
 fi
