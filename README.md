@@ -144,15 +144,15 @@ example:
   in every directory.
 - SSH hosts as a block in `~/.ssh/config`.
 
-For an SSH URL such as `git@github.com:you/private.git`, Git authenticates
-through your configured SSH agent. On a fresh Mac, the bootstrap installs
-1Password in the same run, so private stage access may initially fail. Then:
+For a private repository, **prefer HTTPS** and authenticate with native GitHub CLI before bootstrap:
 
-1. Sign in to the 1Password app.
-2. Turn on its SSH agent (Settings > Developer).
-3. Make sure the SSH key for the GitHub account that can read the repository
-   is in a vault the agent offers.
-4. Rerun the bootstrap command (without `--prompt-vars`).
+~~~sh
+gh auth login --hostname github.com --web --git-protocol https
+mise vars private_bootstrap_repo=https://github.com/okhomenko/config.git
+mise bootstrap --from https://github.com/okhomenko/bootstrap.git --update
+~~~
+
+An SSH URL remains supported, but requires an SSH key and agent with access to the repository. 1Password SSH agent integration is optional and independent of the GitHub CLI OAuth login.
 
 GitHub's SSH host keys are added to `~/.ssh/known_hosts`, so the first
 connection does not stop at a host-key prompt.
