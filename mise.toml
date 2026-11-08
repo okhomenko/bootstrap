@@ -41,6 +41,7 @@ fi
 "~/.oh-my-zsh" = { url = "https://github.com/ohmyzsh/ohmyzsh.git" }
 
 [dotfiles]
+"~/.codex/config.toml/tui" = { source = "codex/tui.toml", merge = true }
 "~/.zshenv/local-bin" = { line = 'export PATH="$HOME/.local/bin:$PATH"', position = "prepend" }
 "~/.config/mise/conf.d/bootstrap.toml" = { source = "global.toml", mode = "symlink" }
 "~/.zshrc/oh-my-zsh" = { block = '''

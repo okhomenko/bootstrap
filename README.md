@@ -8,6 +8,7 @@ Sets up macOS and Arch Linux using [mise bootstrap](https://mise.jdx.dev/bootstr
 bootstrap/
 ├── .miserc.toml             # auto_env = true
 ├── mise.toml                # Shared user config: Oh My Zsh, Git, Kitty, LazyVim
+├── codex/tui.toml           # Codex TUI keys merged into existing config
 ├── mise.linux.toml          # Arch per-user config and login shell
 ├── mise.macos.toml          # macOS per-user config, defaults, LaunchAgents
 ├── mise.system-linux.toml   # Arch pacman/AUR packages and setup hook
@@ -90,6 +91,28 @@ This installs Homebrew packages and casks (including 1Password, Kitty, and devel
 ~~~
 
 This applies shared dotfiles, runtimes, LazyVim, macOS user defaults, LaunchAgents, and Sublime Text Package Control. The Sublime setup hook runs after the `dotfiles` phase, not the system package phase. Start a new login session afterwards.
+
+## Codex CLI preferences
+
+The common user bootstrap uses mise's TOML **merge** entry to manage only Codex's TUI preferences.
+
+- Source: `codex/tui.toml`
+- Target: `~/.codex/config.toml`
+- Declaration in `mise.toml`:
+
+~~~toml
+[dotfiles]
+"~/.codex/config.toml/tui" = { source = "codex/tui.toml", merge = true }
+~~~
+
+Mise adds or updates only `tui.status_line`, `tui.status_line_use_colors`, and `tui.terminal_title`. All other Codex settings, including existing model preferences, MCP servers, trusted projects, and local instructions, remain untouched. The status-line and title arrays are **replaced** with the declared arrays on every apply; changing them interactively in Codex may show up as drift until you update `codex/tui.toml`.
+
+~~~sh
+mise bootstrap --from https://github.com/okhomenko/bootstrap.git --update
+mise dot status
+~~~
+
+Do not symlink or copy over the entire `~/.codex/config.toml`: Codex also writes settings there. Merge entries require mise 2026.10.4 or newer.
 
 ## GitHub CLI authentication
 

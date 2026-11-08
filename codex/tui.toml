@@ -1,0 +1,14 @@
+# Shared Codex TUI preferences. Mise merges these keys into ~/.codex/config.toml
+# without replacing unrelated Codex configuration.
+[tui]
+status_line = [
+  "model-with-reasoning",
+  "project-name",
+  "git-branch",
+  "context-remaining",
+  "five-hour-limit",
+  "weekly-limit",
+  "used-tokens",
+]
+status_line_use_colors = true
+terminal_title = ["spinner", "project", "git-branch"]
