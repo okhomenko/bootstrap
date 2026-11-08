@@ -1,136 +1,109 @@
 # bootstrap
 
-Sets up macOS and Arch Linux with [`mise bootstrap`](https://mise.jdx.dev/bootstrap.html):
-Homebrew on macOS, pacman on Arch, zsh with oh-my-zsh, kitty, Neovim with
-LazyVim, Git defaults, and runtime tools (Node, Python, Bun, Java).
-macOS-only preferences stay on macOS.
-
-The repository holds no identity, credentials, or host details. Those come from
-an optional private stage, described below.
+Sets up macOS and Arch Linux using [mise bootstrap](https://mise.jdx.dev/bootstrap.html). System packages and per-user configuration are separate. Run the system setup once per machine, then the user setup once for each account.
 
 ## Repository layout
 
-```text
+~~~text
 bootstrap/
-├── .miserc.toml       # auto_env = true
-├── mise.toml          # shared dotfiles, repositories, bootstrap task
-├── mise.macos.toml    # Homebrew, Apple settings, macOS-specific files
-├── mise.linux.toml    # pacman packages, Linux-specific files
-└── global.toml        # Node, Python, Bun, Java (linked globally)
-```
+├── .miserc.toml             # auto_env = true
+├── mise.toml                # Shared user config: Oh My Zsh, Git, Kitty, LazyVim
+├── mise.linux.toml          # Arch per-user config and login shell
+├── mise.macos.toml          # macOS per-user config, defaults, LaunchAgents
+├── mise.system-linux.toml   # Arch pacman/AUR packages and setup hook
+├── mise.system-macos.toml   # Homebrew packages and prerequisites
+└── global.toml              # Per-user Node, Python, Bun, Java
+~~~
 
-Platform files are activated automatically by mise's `auto_env` setting.
-Packages for one OS are never evaluated as part of the other OS's setup.
+`mise.linux.toml` and `mise.macos.toml` load automatically based on OS because `.miserc.toml` enables `auto_env`. The `system-linux` and `system-macos` environments are **not** automatic; select them explicitly with `-E`.
 
-## Set up a Mac
+## Arch Linux
 
-1. Install the Xcode Command Line Tools and wait for the installer to finish.
-   `mise bootstrap --from` needs a working `git` to clone this repository.
+### System bootstrap (once per machine)
 
-   ```sh
-   xcode-select --install
-   ```
+Install minimal prerequisites:
 
-2. Install mise:
+~~~sh
+sudo pacman -Syu
+sudo pacman -S --needed mise git zsh
+~~~
 
-   ```sh
-   curl -fsSL https://mise.run | sh
-   ```
+Apply machine packages from a regular user with sudo access:
 
-3. Run the bootstrap:
+~~~sh
+mise -E system-linux bootstrap \
+  --from https://github.com/okhomenko/bootstrap.git \
+  --only packages --update
+~~~
 
-   ```sh
-   ~/.local/bin/mise bootstrap --from https://github.com/okhomenko/bootstrap.git --prompt-vars
-   ```
+This installs pacman packages (including `github-cli`, `openai-codex`, `fzf`, `neovim`) and 1Password AUR packages. The package hook installs an AUR helper if missing and verifies the 1Password GPG key. The first run needs an interactive terminal. Packages are shared by all accounts and updated by pacman.
 
-   mise asks once for a private bootstrap repository. Press Enter to keep
-   `skip`, or give a Git URL (see [Private stage](#private-stage)). The answer
-   is saved in `~/.local/state/mise/vars.toml`, outside any config file, and
-   later runs reuse it.
+### User bootstrap (each account)
 
-4. Open a new terminal.
+Sign in as the target non-root user:
 
-mise keeps its checkout of this repository in
-`~/.local/share/mise/bootstrap-repo`. The runtime tool list, `global.toml`, is
-linked to `~/.config/mise/conf.d/bootstrap.toml`, so it applies in every
-directory.
+~~~sh
+mise bootstrap \
+  --from https://github.com/okhomenko/bootstrap.git \
+  --update --prompt-vars
+~~~
 
-## Set up Arch Linux
+This applies Oh My Zsh, `~/.zshrc` (including SSH prompt), Git and SSH settings, Kitty, LazyVim, user runtime tools, and the login shell (`/usr/bin/zsh`). No pacman or AUR packages are installed.
 
-The same repository supports Arch; mise selects `mise.linux.toml` on Arch and `mise.macos.toml` on macOS.
-The shared `mise.toml` contains dotfiles, repositories, and bootstrap tasks. The Arch package list uses official repositories; pacman owns native package
-versions and upgrades. The repository's `.miserc.toml` enables automatic
-platform environments.
+When adding a new user to an already provisioned Arch machine, run only the user command. Start a new login session after changing the shell.
 
-1. Install only the minimal bootstrap prerequisites:
+Verify:
 
-   ```sh
-   sudo pacman -Syu
-   sudo pacman -S --needed mise git zsh
-   ```
+~~~sh
+command -v mise gh codex git nvim fzf
+test -d ~/.oh-my-zsh
+mise doctor
+~~~
 
-2. Run the public bootstrap as your regular user:
+## macOS
 
-   ```sh
-   mise bootstrap --from https://github.com/okhomenko/bootstrap.git --prompt-vars
-   ```
+### System bootstrap (once per machine)
 
-   On a fresh Arch installation, the Linux `pre-packages` hook installs
-   `base-devel`, downloads the `yay` AUR build recipe, shows the PKGBUILD,
-   and requests approval before building and installing `yay`. The hook also
-   verifies and imports the official 1Password signing key. If `yay` or
-   `paru` already exists, the AUR-helper installation is skipped. After the
-   hook, the normal `mise` package phase installs system packages with
-   `pacman` and 1Password packages with the AUR helper.
+On a fresh Mac, install Command Line Tools and mise:
 
-3. Open a new zsh session and verify:
+~~~sh
+xcode-select --install
+curl -fsSL https://mise.run | sh
+~~~
 
-   ```sh
-   command -v mise gh git kitty nvim op 1password
-   pacman -Q yay 1password 1password-cli
-   mise doctor
-   mise bootstrap packages status
-   ```
+Complete the Command Line Tools installation, then apply packages from an admin account:
 
-   If the system uses `paru` rather than `yay`, check `pacman -Q paru`
-   instead.
+~~~sh
+~/.local/bin/mise -E system-macos bootstrap \
+  --from https://github.com/okhomenko/bootstrap.git \
+  --only packages --update
+~~~
 
-The Arch setup includes native packages such as `gh`, `kitty`, `lazygit`,
-`neovim`, `fzf`, `fd`, `ripgrep`, `btop`, `tree-sitter-cli`, and the
-JetBrains Mono Nerd font. It uses the existing `kitty/linux.conf`, Git
-configuration, Oh My Zsh, LazyVim, and the global runtime configuration.
+This installs Homebrew packages and casks (including 1Password, Kitty, and development CLIs).
 
-1Password Desktop (`1password`) and its CLI (`1password-cli`, binary `op`)
-are installed from AUR, not Linuxbrew. Both are installed system-wide via
-pacman after the AUR helper builds them under your normal account. 1Password
-vaults, logins, and SSH agent state remain per user. Other optional apps (such
-as Chrome and Sublime Text) are not installed by this Arch configuration.
+### User bootstrap (each account)
 
-**SSH agent:** unlike macOS, the public Arch bootstrap does not configure a
-1Password SSH agent. Keep your existing SSH configuration until 1Password is
-installed and its Linux socket is working. If you use 1Password later, the
-Linux socket is `~/.1password/agent.sock`.
+~~~sh
+~/.local/bin/mise bootstrap \
+  --from https://github.com/okhomenko/bootstrap.git \
+  --update --prompt-vars
+~~~
 
-### If a previous bootstrap attempted Linuxbrew
+This applies shared dotfiles, runtimes, LazyVim, macOS user defaults, LaunchAgents, and Sublime Text Package Control. The Sublime setup hook runs after the `dotfiles` phase, not the system package phase. Start a new login session afterwards.
 
-Cancel the Homebrew prompt and run the updated bootstrap with `--update`;
-existing bootstraps retain their previous checkout until explicitly updated:
+## Update, preview, and scope
 
-```sh
-mise bootstrap --from https://github.com/okhomenko/bootstrap.git --update
-```
+~~~sh
+# Preview system packages on Arch:
+mise -E system-linux bootstrap --from https://github.com/okhomenko/bootstrap.git --only packages --dry-run
 
-Preview planned native packages with `mise bootstrap packages apply --dry-run`
-before approving installations.
+# Preview this user's configuration:
+mise bootstrap --from https://github.com/okhomenko/bootstrap.git --dry-run
+~~~
 
-## Update
+Use `--update` to fast-forward the local bootstrap checkout after a repository change. Existing installs need no package removal. Never run the bootstrap as root. Do **not** use `--save-env` with `system-linux` or `system-macos`: that would persist system package declarations into normal user runs.
 
-```sh
-mise bootstrap --from https://github.com/okhomenko/bootstrap.git --update
-```
-
-`--update` fast-forwards the checkout before applying it. Without it, mise
-reapplies the commit it already has.
+`global.toml` is linked to `~/.config/mise/conf.d/bootstrap.toml` for each account, so runtime tools remain user-owned. The public repository contains no credentials or personal Git identity.
 
 ## Private stage
 
@@ -139,11 +112,11 @@ repository:
 
 1. On the first run, it checks with `git ls-remote` that the repository is
    readable, and stops with a hint if not.
-2. It runs `mise -E bootstrap bootstrap --from <url>`, which clones the
-   repository into `~/code/<name>` and applies its `mise.bootstrap.toml`.
+2. It clones the repository into `~/code/<name>` and applies its
+   `mise.bootstrap.toml`, restricted to user-level phases (no packages).
 
 The private repository needs a `mise.bootstrap.toml` at its root, in the same
-format as this repository's `mise.toml`. Put anything personal there, for
+format as this repository's `mise.toml`. Its user bootstrap skips package and system service phases. Put anything personal there, for
 example:
 
 - Git identity and credential helpers in `~/.config/git/private.gitconfig`,
@@ -178,7 +151,6 @@ mise vars unset private_bootstrap_repo   # ask again on the next --prompt-vars r
 
 ## Scope
 
-Use this on macOS or Arch Linux where nothing else manages the same files,
-such as Home Manager. Git reads both `~/.gitconfig` and `~/.config/git/config`, and a
-`~/.config/mise/config.toml` overrides the files in `~/.config/mise/conf.d/`.
-`mise config ls` lists the config files mise loads, lowest precedence first.
+The system phase runs under a regular sudo-capable user; the user phase configures the current user's home directory. Personal credentials, 1Password vaults, SSH agents, and Codex sessions are per-user.
+
+Avoid using another dotfile manager such as Home Manager to own the same files. Git reads both `~/.gitconfig` and `~/.config/git/config`, and `~/.config/mise/config.toml` overrides files in `~/.config/mise/conf.d/`. Use `mise config ls` to inspect loaded config files.

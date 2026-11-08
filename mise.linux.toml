@@ -1,87 +1,4 @@
-# Bootstrap an AUR helper before mise processes aur: package entries.
-# Keep the resulting yay package under pacman ownership, not under mise [tools].
-[bootstrap.hooks.pre-packages]
-description = "Prepare yay AUR helper and 1Password signing key"
-run = '''
-#!/bin/sh
-set -eu
-
-if [ "$(id -u)" -eq 0 ]; then
-  echo "Run mise bootstrap as a regular user, not root." >&2
-  exit 1
-fi
-
-if ! command -v yay >/dev/null 2>&1 && ! command -v paru >/dev/null 2>&1; then
-  if [ ! -t 0 ]; then
-    echo "Initial yay bootstrap requires an interactive terminal to review its PKGBUILD." >&2
-    exit 1
-  fi
-
-  sudo pacman -S --needed git base-devel
-
-  work_dir="${work_dir:-$(mktemp -d)}"
-  trap 'rm -rf "$work_dir"' EXIT HUP INT TERM
-  git clone --depth 1 https://aur.archlinux.org/yay.git "$work_dir/yay"
-
-  echo "Review the yay AUR build recipe before continuing:"
-  cat "$work_dir/yay/PKGBUILD"
-  printf '\nBuild and install yay? [y/N] '
-  IFS= read -r answer
-  case "$answer" in
-    y|Y|yes|YES|Yes) ;;
-    *) echo "Canceled yay installation." >&2; exit 1 ;;
-  esac
-
-  (cd "$work_dir/yay" && makepkg -si)
-fi
-
-# Verify the publisher's documented fingerprint before importing the key.
-# On minimal images these two commands may not be installed yet.
-if ! command -v curl >/dev/null 2>&1 || ! command -v gpg >/dev/null 2>&1; then
-  sudo pacman -S --needed curl gnupg
-fi
-fingerprint="3FEF9748469ADBE15DA7CA80AC2D62742012EA22"
-if ! gpg --list-keys --with-colons "$fingerprint" 2>/dev/null |
-    grep -Fq "fpr:::::::::$fingerprint:"; then
-  if [ -z "${work_dir:-}" ]; then
-    work_dir="$(mktemp -d)"
-    trap 'rm -rf "$work_dir"' EXIT HUP INT TERM
-  fi
-  key_file="$work_dir/1password.asc"
-  curl -fsSL https://downloads.1password.com/linux/keys/1password.asc > "$key_file"
-
-  if ! gpg --show-keys --with-colons "$key_file" |
-       grep -Fq "fpr:::::::::$fingerprint:"; then
-    echo "1Password signing key fingerprint did not match." >&2
-    exit 1
-  fi
-
-  gpg --import "$key_file"
-fi
-'''
-
-[bootstrap.packages]
-"pacman:mise" = "latest"
-"pacman:git" = "latest"
-"pacman:base-devel" = "latest"
-"pacman:github-cli" = "latest"
-"pacman:zsh" = "latest"
-"pacman:curl" = "latest"
-"pacman:openssh" = "latest"
-"pacman:kitty" = "latest"
-"pacman:neovim" = "latest"
-"pacman:fzf" = "latest"
-"pacman:fd" = "latest"
-"pacman:ripgrep" = "latest"
-"pacman:btop" = "latest"
-"pacman:lazygit" = "latest"
-"pacman:tree-sitter-cli" = "latest"
-"pacman:ttf-jetbrains-mono-nerd" = "latest"
-
-# AUR packages require paru or yay and base-devel.
-"aur:1password" = "latest"
-"aur:1password-cli" = "latest"
-
+# Arch per-user configuration. Automatically loaded on Linux.
 [dotfiles]
 "~/.config/kitty/linux.conf" = { content = '''
 hide_window_decorations yes
@@ -98,3 +15,6 @@ map ctrl+alt+7 goto_tab 7
 map ctrl+alt+8 goto_tab 8
 map ctrl+alt+9 goto_tab 9
 ''' }
+
+[bootstrap.user]
+login_shell = "/usr/bin/zsh"

@@ -1,36 +1,5 @@
-[bootstrap.packages]
-"brew:lazygit" = "latest"
-"brew:tree-sitter-cli" = "latest"
-"brew:gh" = "latest"
-"brew:git" = "latest"
-"brew:neovim" = "latest"
-"brew:fzf" = "latest"
-"brew:fd" = "latest"
-"brew:ripgrep" = "latest"
-"brew:btop" = "latest"
-"brew:herdr" = "latest"
-"brew-cask:kitty" = "latest"
-"brew-cask:1password" = "latest"
-"brew-cask:1password-cli" = "latest"
-"brew-cask:google-chrome" = "latest"
-"brew-cask:chatgpt" = "latest"
-"brew-cask:font-jetbrains-mono-nerd-font" = "latest"
-"brew-cask:sublime-text" = "latest"
-"brew-cask:codex" = "latest"
-"brew-cask:claude-code" = "latest"
-
-[bootstrap.hooks.pre-packages]
-description = "Ensure Apple Command Line Tools are installed"
-run = '''
-if [ "$(uname -s)" = "Darwin" ] && \
-   ! xcode-select -p >/dev/null 2>&1; then
-  xcode-select --install
-  echo "Complete installation, then rerun mise bootstrap"
-  exit 1
-fi
-'''
-
-[bootstrap.hooks.post-packages]
+# macOS per-user configuration. Automatically loaded on macOS.
+[bootstrap.hooks.post-dotfiles]
 description = "Install Sublime Text Package Control"
 run = '''
 if [ "$(uname -s)" = "Darwin" ]; then
@@ -43,16 +12,6 @@ if [ "$(uname -s)" = "Darwin" ]; then
       -o "$target"
   fi
 fi
-'''
-
-[dotfiles."~/Library/Application Support/Sublime Text/Packages/User/Package Control.sublime-settings"]
-content = '''
-{
-  "installed_packages": [
-    "Package Control",
-    "JsFormat"
-  ]
-}
 '''
 
 [dotfiles]
