@@ -1,0 +1,3 @@
+# Opt in with -E runtimes to manage global development runtime versions.
+[dotfiles]
+"~/.config/mise/conf.d/bootstrap.toml" = { source = "global.toml", mode = "symlink" }

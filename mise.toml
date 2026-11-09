@@ -43,7 +43,6 @@ fi
 [dotfiles]
 "~/.codex/config.toml/tui" = { source = "codex/tui.toml", merge = true }
 "~/.zshenv/local-bin" = { line = 'export PATH="$HOME/.local/bin:$PATH"', position = "prepend" }
-"~/.config/mise/conf.d/bootstrap.toml" = { source = "global.toml", mode = "symlink" }
 "~/.zshrc/oh-my-zsh" = { block = '''
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="robbyrussell"
@@ -62,52 +61,6 @@ fi
 github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
 github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
 github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
-''' }
-
-"~/.config/kitty/kitty.conf" = { content = '''
-font_family JetBrainsMonoNL Nerd Font Mono
-font_size 15
-shell_integration no-rc
-
-editor nvim
-kitty_mod ctrl+shift
-background_opacity 1.0
-dynamic_background_opacity no
-inactive_text_alpha 1.0
-bold_font auto
-italic_font auto
-bold_italic_font auto
-enable_audio_bell no
-remember_window_size no
-
-tab_bar_edge top
-tab_bar_style powerline
-tab_powerline_style round
-tab_bar_min_tabs 1
-active_tab_font_style bold
-inactive_tab_font_style normal
-tab_title_template "{fmt.fg.red}{bell_symbol}{activity_symbol}{fmt.fg.tab}{tab.last_focused_progress_percent}{custom}"
-
-map kitty_mod+z toggle_layout stack
-map kitty_mod+h neighboring_window left
-map kitty_mod+j neighboring_window down
-map kitty_mod+k neighboring_window up
-map kitty_mod+l neighboring_window right
-map kitty_mod+r clear_terminal reset active
-
-# Shared split shortcuts
-map kitty_mod+enter combine : goto_layout splits : launch --cwd=current --location=hsplit
-map kitty_mod+backslash combine : goto_layout splits : launch --cwd=current --location=vsplit
-
-# Platform-specific configuration
-include ${KITTY_OS}.conf
-''' }
-"~/.config/kitty/tab_bar.py" = { content = '''
-def draw_title(data):
-    title = str(data.get("title", ""))
-    if data.get("layout_name") == "stack":
-        return "[Z] " + title
-    return title
 ''' }
 
 "~/.gitconfig" = { content = '''

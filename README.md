@@ -144,7 +144,7 @@ mise bootstrap --from https://github.com/okhomenko/bootstrap.git --dry-run
 
 Use `--update` to fast-forward the local bootstrap checkout after a repository change. Existing installs need no package removal. Never run the bootstrap as root. Do **not** use `--save-env` with `system-linux` or `system-macos`: that would persist system package declarations into normal user runs.
 
-`global.toml` is linked to `~/.config/mise/conf.d/bootstrap.toml` for each account, so runtime tools remain user-owned. The public repository contains no credentials or personal Git identity.
+`global.toml` is linked to `~/.config/mise/conf.d/bootstrap.toml` only when the `runtimes` environment is selected, so global runtime changes are opt-in and tools remain user-owned. The public repository contains no credentials or personal Git identity.
 
 ## Private stage
 
@@ -209,3 +209,24 @@ mise vars unset private_bootstrap_repo   # ask again on the next --prompt-vars r
 The system phase runs under a regular sudo-capable user; the user phase configures the current user's home directory. Personal credentials, 1Password vaults, SSH agents, and Codex sessions are per-user.
 
 Avoid using another dotfile manager such as Home Manager to own the same files. Git reads both `~/.gitconfig` and `~/.config/git/config`, and `~/.config/mise/config.toml` overrides files in `~/.config/mise/conf.d/`. Use `mise config ls` to inspect loaded config files.
+
+## Applying on an existing Omarchy desktop
+
+Linux bootstrap preserves the distribution's Kitty configuration and configures
+SSH to use the 1Password agent at `~/.1password/agent.sock`. Enable the agent
+in the 1Password desktop app first. macOS keeps its own Kitty and agent settings.
+
+Preview and apply user configuration explicitly on Linux:
+
+~~~sh
+mise -E linux bootstrap --from https://github.com/okhomenko/bootstrap.git --update --only repos,dotfiles,mise-shell-activate
+~~~
+
+This leaves system packages, the login shell, runtime installations, and the
+private-stage task alone. Apply the private repository's dotfiles separately.
+If Zsh is not installed, preserve the current login shell; Zsh configuration
+can be prepared without selecting it as the login shell.
+
+Global runtime declarations are opt-in: add `-E runtimes` when bootstrapping
+to deploy `global.toml`. Review its versions first, then run `mise install`
+explicitly to install them. Existing deployed runtime files are not removed.
