@@ -49,7 +49,7 @@ mise bootstrap \
   --update --prompt-vars
 ~~~
 
-This applies Oh My Zsh, `~/.zshrc` (including SSH prompt), Git and SSH settings, Kitty, LazyVim, user runtime tools, and the login shell (`/usr/bin/zsh`). No pacman or AUR packages are installed.
+This applies Oh My Zsh, `~/.zshrc` (including SSH prompt), Git and SSH settings, Kitty, LazyVim, user runtime tools, and the login shell (`/bin/zsh`). No pacman or AUR packages are installed.
 
 When adding a new user to an already provisioned Arch machine, run only the user command. Start a new login session after changing the shell.
 

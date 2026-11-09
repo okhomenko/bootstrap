@@ -17,4 +17,4 @@ map ctrl+alt+9 goto_tab 9
 ''' }
 
 [bootstrap.user]
-login_shell = "/usr/bin/zsh"
+login_shell = "/bin/zsh"
