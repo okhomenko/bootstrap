@@ -34,7 +34,7 @@ fi
 
 {{ mise_bin | quote }} -E bootstrap bootstrap --from "$repo" --from-dir "$dir" \
   --only repos,dotfiles,mise-shell-activate,macos-defaults,macos-launchd-agents,linux-systemd-units,user,tools,task \
-  --yes
+  --update --yes
 '''
 
 [bootstrap.repos]

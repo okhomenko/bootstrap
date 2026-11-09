@@ -153,14 +153,15 @@ repository:
 
 1. On the first run, it checks with `git ls-remote` that the repository is
    readable, and stops with a hint if not.
-2. It clones the repository into `~/code/<name>` and applies its
-   `mise.bootstrap.toml`, restricted to user-level phases (no packages).
+2. It clones the repository into `~/code/<name>` (or fast-forwards an existing
+   checkout) and applies its `mise.bootstrap.toml`, restricted to user-level
+   phases (no packages).
 
 The private repository needs a `mise.bootstrap.toml` at its root, in the same
 format as this repository's `mise.toml`. Its user bootstrap skips package and system service phases. Put anything personal there, for
 example:
 
-- Git identity and credential helpers in `~/.config/git/private.gitconfig`,
+- Git identity and optional overrides in `~/.config/git/private.gitconfig`,
   which this repository's `~/.gitconfig` includes. Git ignores the include
   while the file does not exist.
 - Environment variables in a file under `~/.config/mise/conf.d/`, so they apply
@@ -180,13 +181,26 @@ An SSH URL remains supported, but requires an SSH key and agent with access to t
 GitHub's SSH host keys are added to `~/.ssh/known_hosts`, so the first
 connection does not stop at a host-key prompt.
 
-The private checkout is yours to update: pull in `~/code/<name>`, then rerun
-the bootstrap. `--update` fast-forwards only this repository's checkout.
+## Change and reapply configuration
+
+Edit the appropriate repository, commit, and push it to GitHub. Shared settings
+belong in `bootstrap`; personal Git identity and other private settings belong
+in the private repository. Then apply the published versions:
+
+~~~sh
+mise bootstrap --from https://github.com/okhomenko/bootstrap.git --update
+git config --includes --show-origin --get user.name
+git config --includes --show-origin --get user.email
+~~~
+
+The outer `--update` fast-forwards the public checkout. Its private stage also
+fast-forwards the configured private checkout before applying it. A checkout
+with uncommitted changes must be cleaned up before it can be updated.
 
 To change the answer later:
 
 ```sh
-mise vars private_bootstrap_repo=git@github.com:you/private.git
+mise vars private_bootstrap_repo=https://github.com/you/private.git
 mise vars unset private_bootstrap_repo   # ask again on the next --prompt-vars run
 ```
 
