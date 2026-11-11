@@ -8,6 +8,7 @@
 "brew:fzf" = "latest"
 "brew:fd" = "latest"
 "brew:ripgrep" = "latest"
+"brew:jq" = "latest"
 "brew:btop" = "latest"
 "brew:herdr" = "latest"
 "brew-cask:kitty" = "latest"

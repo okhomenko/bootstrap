@@ -75,6 +75,7 @@ fi
 "pacman:fzf" = "latest"
 "pacman:fd" = "latest"
 "pacman:ripgrep" = "latest"
+"pacman:jq" = "latest"
 "pacman:btop" = "latest"
 "pacman:lazygit" = "latest"
 "pacman:tree-sitter-cli" = "latest"
