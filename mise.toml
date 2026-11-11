@@ -44,6 +44,12 @@ fi
 "~/.codex/config.toml/tui" = { source = "codex/tui.toml", merge = true }
 "~/.claude/statusline.sh" = { source = "claude/statusline.sh", mode = "symlink" }
 "~/.claude/settings.json/bootstrap" = { source = "claude/settings.json", merge = true }
+# Override the legacy Cursor co-author for chargebee-tech/brightback-tech repos.
+# The commit-msg hook uses the last home.coauthor value, so this block wins.
+"~/.config/git/github-emu.gitconfig/coauthor" = { block = '''
+[home]
+  coauthor = Claude Fable 5.2 <noreply@anthropic.com>
+''' }
 "~/.zshenv/local-bin" = { line = 'export PATH="$HOME/.local/bin:$PATH"', position = "prepend" }
 "~/.zshrc/oh-my-zsh" = { block = '''
 export ZSH="$HOME/.oh-my-zsh"
