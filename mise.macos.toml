@@ -111,6 +111,9 @@ NSAutomaticWindowAnimationsEnabled = false
 NSWindowResizeTime = 0.001
 NSScrollAnimationEnabled = false
 QLPanelAnimationDuration = 0.0
+# Always auto-hide the menu bar (not only in full screen).
+_HIHideMenuBar = true
+AppleMenuBarVisibleInFullscreen = false
 
 [bootstrap.macos.defaults."com.apple.universalaccess"]
 reduceMotion = true
