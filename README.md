@@ -10,7 +10,7 @@ bootstrap/
 ├── mise.toml                # Shared user config: Oh My Zsh, Git, Kitty, LazyVim
 ├── codex/tui.toml           # Codex TUI keys merged into existing config
 ├── claude/statusline.sh     # Claude Code status line script (symlinked)
-├── claude/settings.json     # Claude statusLine key merged into existing settings
+├── claude/settings.json     # Claude settings keys merged into existing settings
 ├── mise.linux.toml          # Arch per-user config and login shell
 ├── mise.macos.toml          # macOS per-user config, defaults, LaunchAgents
 ├── mise.system-linux.toml   # Arch pacman/AUR packages and setup hook
@@ -118,9 +118,11 @@ Do not symlink or copy over the entire `~/.codex/config.toml`: Codex also writes
 
 ## Claude Code status line
 
-`claude/statusline.sh` is symlinked to `~/.claude/statusline.sh`, and the
-`statusLine` key from `claude/settings.json` is merged into
-`~/.claude/settings.json`; other Claude settings remain untouched. The script
+`claude/statusline.sh` is symlinked to `~/.claude/statusline.sh`, and the keys
+in `claude/settings.json` are merged into `~/.claude/settings.json`; other Claude
+settings remain untouched. Besides `statusLine`, it disables away summaries
+(`awaySummaryEnabled`) and the feedback survey
+(`env.CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY`). The script
 shows model, effort, folder, Git branch and changes, PR state, context usage,
 session cost, duration, lines changed, and 5h/7d rate limits. It requires `jq`,
 which the system bootstrap installs.

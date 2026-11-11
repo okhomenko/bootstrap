@@ -43,7 +43,7 @@ fi
 [dotfiles]
 "~/.codex/config.toml/tui" = { source = "codex/tui.toml", merge = true }
 "~/.claude/statusline.sh" = { source = "claude/statusline.sh", mode = "symlink" }
-"~/.claude/settings.json/statusline" = { source = "claude/settings.json", merge = true }
+"~/.claude/settings.json/bootstrap" = { source = "claude/settings.json", merge = true }
 "~/.zshenv/local-bin" = { line = 'export PATH="$HOME/.local/bin:$PATH"', position = "prepend" }
 "~/.zshrc/oh-my-zsh" = { block = '''
 export ZSH="$HOME/.oh-my-zsh"
