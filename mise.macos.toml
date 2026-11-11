@@ -14,6 +14,16 @@ if [ "$(uname -s)" = "Darwin" ]; then
 fi
 '''
 
+# Always auto-hide the menu bar. Writing _HIHideMenuBar with defaults only
+# takes effect after logging in again; System Events applies it immediately.
+[bootstrap.hooks.post-defaults]
+description = "Auto-hide the macOS menu bar"
+run = '''
+if [ "$(uname -s)" = "Darwin" ]; then
+  osascript -e 'tell application "System Events" to set autohide menu bar of dock preferences to true' >/dev/null
+fi
+'''
+
 [dotfiles]
 "~/.config/kitty/kitty.conf" = { content = '''
 font_family JetBrainsMonoNL Nerd Font Mono
@@ -111,9 +121,6 @@ NSAutomaticWindowAnimationsEnabled = false
 NSWindowResizeTime = 0.001
 NSScrollAnimationEnabled = false
 QLPanelAnimationDuration = 0.0
-# Always auto-hide the menu bar (not only in full screen).
-_HIHideMenuBar = true
-AppleMenuBarVisibleInFullscreen = false
 
 [bootstrap.macos.defaults."com.apple.universalaccess"]
 reduceMotion = true

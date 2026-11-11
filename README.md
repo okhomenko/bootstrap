@@ -127,13 +127,12 @@ shows model, effort, folder, Git branch and changes, PR state, context usage,
 session cost, duration, lines changed, and 5h/7d rate limits. It requires `jq`,
 which the system bootstrap installs.
 
-## Commit co-author
+## GitHub URLs
 
-For work repositories (`chargebee-tech`, `brightback-tech`), a managed block in
-`~/.config/git/github-emu.gitconfig` sets `home.coauthor` to
-`Claude Fable 5.2 <noreply@anthropic.com>`. The legacy commit-msg hook replaces
-any `Co-authored-by` trailers with this value, and Git uses the last value
-when a key is set more than once, so the block overrides older entries.
+`~/.gitconfig` rewrites `git@github.com:` and `ssh://git@github.com/` URLs to
+HTTPS, so every GitHub remote uses the GitHub CLI credential helper. Which
+GitHub account and Git identity each organization uses is private and belongs
+in the private repository.
 
 ## GitHub CLI authentication
 
