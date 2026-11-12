@@ -1,0 +1,5 @@
+# Herdr keys. Mise merges these into ~/.config/herdr/config.toml without
+# replacing settings Herdr writes there itself.
+[keys]
+# Caps Lock doubles as Esc, so Ctrl+B is awkward; use Ctrl+Space instead.
+prefix = "ctrl+space"

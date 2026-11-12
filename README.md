@@ -11,6 +11,7 @@ bootstrap/
 ├── codex/tui.toml           # Codex TUI keys merged into existing config
 ├── claude/statusline.sh     # Claude Code status line script (symlinked)
 ├── claude/settings.json     # Claude settings keys merged into existing settings
+├── herdr/keys.toml          # Herdr [keys] merged into existing config (macOS)
 ├── mise.linux.toml          # Arch per-user config and login shell
 ├── mise.macos.toml          # macOS per-user config, defaults, LaunchAgents
 ├── mise.system-linux.toml   # Arch pacman/AUR packages and setup hook
@@ -126,6 +127,13 @@ settings remain untouched. Besides `statusLine`, it disables away summaries
 shows model, effort, folder, Git branch and changes, PR state, context usage,
 session cost, duration, lines changed, and 5h/7d rate limits. It requires `jq`,
 which the system bootstrap installs.
+
+## Herdr prefix
+
+On macOS, `herdr/keys.toml` is merged into `~/.config/herdr/config.toml`,
+setting the Herdr prefix to `ctrl+space` (Caps Lock is used as Esc, so the
+default `ctrl+b` is awkward). Other Herdr settings remain untouched. After
+applying, run `herdr server reload-config` to pick it up in a running server.
 
 ## GitHub URLs
 
