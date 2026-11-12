@@ -7,11 +7,11 @@ Sets up macOS and Arch Linux using [mise bootstrap](https://mise.jdx.dev/bootstr
 ~~~text
 bootstrap/
 ├── .miserc.toml             # auto_env = true
-├── mise.toml                # Shared user config: Oh My Zsh, Git, Kitty, LazyVim
+├── mise.toml                # Shared user config: Oh My Zsh, Git, Kitty, LazyVim, Herdr keys
 ├── codex/tui.toml           # Codex TUI keys merged into existing config
 ├── claude/statusline.sh     # Claude Code status line script (symlinked)
 ├── claude/settings.json     # Claude settings keys merged into existing settings
-├── herdr/keys.toml          # Herdr [keys] merged into existing config (macOS)
+├── herdr/keys.toml          # Herdr [keys] merged into existing config
 ├── mise.linux.toml          # Arch per-user config and login shell
 ├── mise.macos.toml          # macOS per-user config, defaults, LaunchAgents
 ├── mise.system-linux.toml   # Arch pacman/AUR packages and setup hook
@@ -40,7 +40,7 @@ mise -E system-linux bootstrap \
   --only packages --update
 ~~~
 
-This installs pacman packages (including `github-cli`, `openai-codex`, `fzf`, `neovim`) and 1Password AUR packages. The package hook installs an AUR helper if missing and verifies the 1Password GPG key. The first run needs an interactive terminal. Packages are shared by all accounts and updated by pacman.
+This installs pacman packages (including `github-cli`, `openai-codex`, `fzf`, `neovim`) and 1Password and Herdr AUR packages. The package hook installs an AUR helper if missing and verifies the 1Password GPG key. The first run needs an interactive terminal. Packages are shared by all accounts and updated by pacman.
 
 ### User bootstrap (each account)
 
@@ -130,7 +130,7 @@ which the system bootstrap installs.
 
 ## Herdr prefix
 
-On macOS, `herdr/keys.toml` is merged into `~/.config/herdr/config.toml`,
+On both macOS and Arch, `herdr/keys.toml` is merged into `~/.config/herdr/config.toml`,
 setting the Herdr prefix to `ctrl+space` (Caps Lock is used as Esc, so the
 default `ctrl+b` is awkward). Other Herdr settings remain untouched. After
 applying, run `herdr server reload-config` to pick it up in a running server.

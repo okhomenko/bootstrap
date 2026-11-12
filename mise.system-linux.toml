@@ -84,3 +84,4 @@ fi
 # AUR packages require paru or yay and base-devel.
 "aur:1password" = "latest"
 "aur:1password-cli" = "latest"
+"aur:herdr" = "latest"

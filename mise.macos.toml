@@ -25,7 +25,6 @@ fi
 '''
 
 [dotfiles]
-"~/.config/herdr/config.toml/keys" = { source = "herdr/keys.toml", merge = true }
 "~/.config/kitty/kitty.conf" = { content = '''
 font_family JetBrainsMonoNL Nerd Font Mono
 font_size 15
