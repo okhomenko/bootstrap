@@ -76,8 +76,9 @@ def draw_title(data):
   position = "prepend"
 }
 
+# 1Password holds the key for the Arch hosts only; GitHub uses HTTPS.
 "~/.ssh/config/1password-agent" = { block = '''
-Host *
+Host arch remote-arch
   IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 ''' }
 

@@ -242,8 +242,10 @@ Avoid using another dotfile manager such as Home Manager to own the same files. 
 
 Linux bootstrap adds Kitty shortcuts, split navigation, and top tabs in a managed
 block, preserving Omarchy's theme include, colors, and local font size. It configures
-SSH to use the 1Password agent at `~/.1password/agent.sock`. Enable the agent
-in the 1Password desktop app first. macOS keeps its own Kitty and agent settings.
+SSH to use the 1Password agent at `~/.1password/agent.sock` for the `arch` and
+`remote-arch` hosts only (GitHub uses HTTPS). Enable the agent in the 1Password
+desktop app first. macOS keeps its own Kitty settings and uses the agent socket
+in 1Password's group container for the same hosts.
 
 Preview and apply user configuration explicitly on Linux:
 

@@ -35,8 +35,9 @@ map ctrl+alt+8 goto_tab 8
 map ctrl+alt+9 goto_tab 9
 ''' }
 
+# 1Password holds the key for the Arch hosts only; GitHub uses HTTPS.
 "~/.ssh/config/1password-agent" = { block = '''
-Host *
+Host arch remote-arch
   IdentityAgent ~/.1password/agent.sock
 ''' }
 
