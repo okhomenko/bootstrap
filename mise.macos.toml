@@ -1,4 +1,24 @@
 # macOS per-user configuration. Automatically loaded on macOS.
+[bootstrap.hooks.pre-dotfiles]
+description = "Remove the unmanaged Host * 1Password agent entry from ~/.ssh/config"
+run = '''
+#!/bin/sh
+set -eu
+cfg="$HOME/.ssh/config"
+[ -f "$cfg" ] || exit 0
+tmp="$cfg.tmp.$$"
+awk '
+  /^# >>> mise:/ { managed = 1 }
+  /^# <<< mise:/ { managed = 0 }
+  !managed && $0 == "Host *" && (getline next_line) > 0 {
+    if (next_line ~ /^[ \t]*IdentityAgent .*1password/) next
+    print; print next_line; next
+  }
+  { print }
+' "$cfg" > "$tmp"
+if cmp -s "$cfg" "$tmp"; then rm -f "$tmp"; else chmod 600 "$tmp"; mv "$tmp" "$cfg"; fi
+'''
+
 [bootstrap.hooks.post-dotfiles]
 description = "Install Sublime Text Package Control"
 run = '''

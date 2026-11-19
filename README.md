@@ -19,7 +19,7 @@ bootstrap/
 └── global.toml              # Per-user Node, Python, Bun, Java
 ~~~
 
-`mise.linux.toml` and `mise.macos.toml` load automatically based on OS because `.miserc.toml` enables `auto_env`. The `system-linux` and `system-macos` environments are **not** automatic; select them explicitly with `-E`.
+`mise.linux.toml` and `mise.macos.toml` load automatically based on OS because `auto_env` is enabled: by `.miserc.toml` inside this repository, and by `~/.config/mise/miserc.toml` (written by the user bootstrap) for `mise bootstrap --from` runs. On the very first run, add `-E macos` or `-E linux`. The `system-linux` and `system-macos` environments are **not** automatic; select them explicitly with `-E`.
 
 ## Arch Linux
 

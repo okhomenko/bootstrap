@@ -44,6 +44,11 @@ fi
 "~/.codex/config.toml/tui" = { source = "codex/tui.toml", merge = true }
 "~/.claude/statusline.sh" = { source = "claude/statusline.sh", mode = "symlink" }
 "~/.claude/settings.json/bootstrap" = { source = "claude/settings.json", merge = true }
+# `mise bootstrap --from` ignores this repository's .miserc.toml, so enable
+# auto_env for the user too; later runs then load mise.<os>.toml.
+"~/.config/mise/miserc.toml" = { content = '''
+auto_env = true
+''' }
 "~/.config/herdr/config.toml/keys" = { source = "herdr/keys.toml", merge = true }
 "~/.zshenv/local-bin" = { line = 'export PATH="$HOME/.local/bin:$PATH"', position = "prepend" }
 "~/.zshrc/oh-my-zsh" = { block = '''
