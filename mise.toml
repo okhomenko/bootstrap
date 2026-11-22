@@ -1,11 +1,13 @@
-# An empty answer is not saved, so mise would ask again on every run.
+# Save an ordered, comma-separated list. Existing installs fall back to the
+# two former vars until config_repos is explicitly set.
+[vars.config_repos]
+default = "legacy"
+prompt = "Config repository URLs, comma separated (skip = none)"
+
 [vars.private_bootstrap_repo]
 default = "skip"
-prompt = "Private bootstrap repository URL (skip = none)"
-
 [vars.chargebee_bootstrap_repo]
 default = "skip"
-prompt = "Chargebee bootstrap repository URL (skip = none)"
 
 [tasks.bootstrap]
 description = "Initialize LazyVim, then apply configured private stages"
@@ -42,8 +44,37 @@ fi
   --update --yes
 }
 
-apply_private_repo {{ vars.private_bootstrap_repo | quote }}
-apply_private_repo {{ vars.chargebee_bootstrap_repo | quote }}
+repos={{ vars.config_repos | quote }}
+if [ "$repos" = legacy ]; then
+  repos=
+  for legacy_repo in {{ vars.private_bootstrap_repo | quote }} {{ vars.chargebee_bootstrap_repo | quote }}; do
+    [ "$legacy_repo" = skip ] && continue
+    [ -z "$repos" ] || repos="$repos,"
+    repos="$repos$legacy_repo"
+  done
+  if [ -n "$repos" ]; then
+    {{ mise_bin | quote }} vars "config_repos=$repos"
+    {{ mise_bin | quote }} vars unset private_bootstrap_repo chargebee_bootstrap_repo
+  fi
+fi
+
+[ "$repos" = skip ] && exit 0
+
+case "$repos" in
+  ,*|*,|*,,*) echo 'Empty config repository URL in config_repos.' >&2; exit 2 ;;
+esac
+
+while [ -n "$repos" ]; do
+  repo=${repos%%,*}
+  repo=$(printf '%s' "$repo" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+  [ -n "$repo" ] || { echo 'Empty config repository URL in config_repos.' >&2; exit 2; }
+  apply_private_repo "$repo"
+
+  case "$repos" in
+    *,*) repos=${repos#*,} ;;
+    *) repos= ;;
+  esac
+done
 '''
 
 [bootstrap.repos]

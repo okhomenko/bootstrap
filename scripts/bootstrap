@@ -8,7 +8,7 @@ Usage: bootstrap update [--dry-run]
        bootstrap platform <list|upgrade|prune> [--dry-run]
        bootstrap tools <list|upgrade|prune> [--dry-run]
 
-update    Pull and apply the remote system and user bootstrap.
+update    Pull and apply bootstrap plus configured config repositories.
 upgrade   Update mise, upgrade platform packages, then upgrade/prune tools.
 platform  Manage configured system packages (Homebrew or pacman/AUR).
 tools     Manage global mise tools; upgrades prune superseded versions.
