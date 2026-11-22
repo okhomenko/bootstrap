@@ -11,7 +11,6 @@ bootstrap/
 ├── codex/tui.toml           # Codex TUI keys merged into existing config
 ├── claude/statusline.sh     # Claude Code status line script (symlinked)
 ├── claude/settings.json     # Claude settings keys merged into existing settings
-├── git/hooks/commit-msg     # Global Git co-author hook (symlinked)
 ├── herdr/keys.toml          # Herdr [keys] merged into existing config
 ├── scripts/bootstrap       # Installed as ~/.local/bin/bootstrap
 ├── mise.linux.toml          # Arch per-user config and login shell
@@ -53,6 +52,12 @@ mise bootstrap \
   --from https://github.com/okhomenko/bootstrap.git \
   --update --prompt-vars
 ~~~
+
+When prompted for the private bootstrap URL, mise saves the answer in its
+per-user state. To pass the URL without a prompt, save it first with
+`mise vars private_bootstrap_repo=https://github.com/okhomenko/config.git`.
+Check the stored value with `mise vars private_bootstrap_repo`. Future
+`bootstrap update` runs use that value to pull and apply the private repo.
 
 This applies Oh My Zsh, `~/.zshrc` (including SSH prompt), Git and SSH settings, Kitty, LazyVim, user runtime tools, and the login shell (`/bin/zsh`). No pacman or AUR packages are installed.
 
@@ -136,13 +141,6 @@ On both macOS and Arch, `herdr/keys.toml` is merged into `~/.config/herdr/config
 setting the Herdr prefix to `ctrl+space` (Caps Lock is used as Esc, so the
 default `ctrl+b` is awkward). Other Herdr settings remain untouched. After
 applying, run `herdr server reload-config` to pick it up in a running server.
-
-## Git hooks
-
-The user bootstrap installs `git/hooks/commit-msg` in `~/.config/git/hooks`
-and sets Git's global `core.hooksPath` to that directory. The hook adds
-`Co-authored-by: Claude Fable 5.2 <noreply@anthropic.com>` to commit messages,
-unless the trailer is already present.
 
 ## GitHub URLs
 
@@ -266,18 +264,19 @@ connection does not stop at a host-key prompt.
 ## Change and reapply configuration
 
 Edit the appropriate repository, commit, and push it to GitHub. Shared settings
-belong in `bootstrap`; personal Git identity and other private settings belong
+belong in `bootstrap`; personal Git identity and global hook settings belong
 in the private repository. Then apply the published versions:
 
 ~~~sh
-mise bootstrap --from https://github.com/okhomenko/bootstrap.git --update
+bootstrap update
 git config --includes --show-origin --get user.name
 git config --includes --show-origin --get user.email
 ~~~
 
-The outer `--update` fast-forwards the public checkout. Its private stage also
-fast-forwards the configured private checkout before applying it. A checkout
-with uncommitted changes must be cleaned up before it can be updated.
+`bootstrap update` fast-forwards the public checkout. Its private stage reads
+the saved `private_bootstrap_repo` value and fast-forwards that checkout before
+applying it. A checkout with uncommitted changes must be cleaned up before it
+can be updated.
 
 To change the answer later:
 

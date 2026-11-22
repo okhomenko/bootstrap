@@ -1,7 +1,0 @@
-#!/bin/sh
-
-trailer='Co-authored-by: Claude Fable 5.2 <noreply@anthropic.com>'
-
-if ! grep -Fxiq "$trailer" "$1"; then
-    printf '\n%s\n' "$trailer" >> "$1"
-fi
