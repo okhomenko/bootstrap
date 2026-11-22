@@ -12,6 +12,7 @@ bootstrap/
 ├── claude/statusline.sh     # Claude Code status line script (symlinked)
 ├── claude/settings.json     # Claude settings keys merged into existing settings
 ├── herdr/keys.toml          # Herdr [keys] merged into existing config
+├── scripts/bootstrap       # Installed as ~/.local/bin/bootstrap
 ├── mise.linux.toml          # Arch per-user config and login shell
 ├── mise.macos.toml          # macOS per-user config, defaults, LaunchAgents
 ├── mise.system-linux.toml   # Arch pacman/AUR packages and setup hook
@@ -161,6 +162,51 @@ One GitHub OAuth login can cover repositories in multiple organizations, subject
 Do not call `gh auth logout` as part of bootstrap: it would remove the required login. Do not set an old `GH_TOKEN` or `GITHUB_TOKEN` globally, as these override the native login.
 
 ## Update, preview, and scope
+
+After user setup, manage the bootstrap from any directory:
+
+~~~sh
+bootstrap update                        # Pull remote config and apply system + user setup
+bootstrap upgrade                       # Update mise, upgrade packages and tools
+bootstrap platform list                 # Show declared system packages and their state
+bootstrap platform upgrade              # Upgrade installed system packages
+bootstrap platform prune --dry-run      # Print Homebrew prune commands
+bootstrap tools list                    # List global tools
+bootstrap tools upgrade                 # Upgrade global tools and prune superseded versions
+bootstrap tools prune                   # Remove unused tool versions
+~~~
+
+`bootstrap update` fast-forwards the checkout that owns the installed script,
+then applies system packages and the full user bootstrap, including the private
+stage if configured. It installs missing packages; use `upgrade` to upgrade
+installed packages. Local changes that prevent a fast-forward stop the update.
+
+`bootstrap upgrade` updates mise (`self-update` on macOS, pacman on Arch),
+then upgrades installed platform packages and global mise tools within their
+configured version ranges. Tool upgrades use `--prune` to immediately remove
+superseded versions unless another tracked config needs them. This command
+uses the current checkout; run `bootstrap update` first to refresh declarations.
+
+Platform commands use this repository's system environment. On macOS this
+includes Homebrew formulae and casks without requiring the `brew` executable;
+on Arch it includes pacman/AUR packages and may require sudo. Platform prune
+uses mise's Homebrew prune: it removes undeclared formulae (including manually
+installed ones) that are not dependencies, plus unchanged mise-owned casks.
+It does not clean old kegs or download caches. Pacman/AUR pruning is unsupported.
+Platform prune is explicit and is not part of upgrade.
+
+Tools commands use global configuration, including `~/.config/mise/conf.d/`,
+instead of the caller's project. Explicit tools prune removes versions unused
+by any tracked configuration, including projects. All commands accept
+`--dry-run` to print the planned commands without executing them, fetching
+remote changes, or running hooks. Run as your regular user.
+
+For an existing installation, install the command once after this change is
+available in the remote repository:
+
+~~~sh
+mise bootstrap --from https://github.com/okhomenko/bootstrap.git --only dotfiles --update
+~~~
 
 ~~~sh
 # Preview system packages on Arch:

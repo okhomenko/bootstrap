@@ -1,0 +1,132 @@
+#!/bin/sh
+set -eu
+
+usage() {
+  cat <<'EOF'
+Usage: bootstrap update [--dry-run]
+       bootstrap upgrade [--dry-run]
+       bootstrap platform <list|upgrade|prune> [--dry-run]
+       bootstrap tools <list|upgrade|prune> [--dry-run]
+
+update    Pull and apply the remote system and user bootstrap.
+upgrade   Update mise, upgrade platform packages, then upgrade/prune tools.
+platform  Manage configured system packages (Homebrew or pacman/AUR).
+tools     Manage global mise tools; upgrades prune superseded versions.
+
+Platform prune removes undeclared Homebrew packages; unsupported on Arch.
+Tools prune removes unused versions while respecting tracked project configs.
+--dry-run prints commands without executing them.
+EOF
+}
+
+scope=${1:-help}
+[ "$#" -eq 0 ] || shift
+case "$scope" in
+  help|-h|--help) usage; exit 0 ;;
+  update|upgrade) action=$scope ;;
+  platform|tools)
+    action=${1:-}
+    case "$action" in
+      list|upgrade|prune) shift ;;
+      *) usage >&2; exit 2 ;;
+    esac
+    ;;
+  *) usage >&2; exit 2 ;;
+esac
+
+dry_run=false
+if [ "${1:-}" = --dry-run ]; then dry_run=true; shift; fi
+[ "$#" -eq 0 ] || { usage >&2; exit 2; }
+
+if [ "$(id -u)" -eq 0 ]; then
+  echo 'Run bootstrap as your regular user, not root.' >&2
+  exit 1
+fi
+mise_bin=$(command -v mise) || {
+  echo 'mise is missing from PATH; run the bootstrap setup first.' >&2
+  exit 1
+}
+
+# Follow the installed ~/.local/bin/bootstrap symlink to its config checkout.
+script=$0
+while [ -L "$script" ]; do
+  script_dir=$(CDPATH= cd -- "$(dirname -- "$script")" && pwd)
+  script=$(readlink "$script")
+  case "$script" in /*) ;; *) script=$script_dir/$script ;; esac
+done
+repo_dir=$(CDPATH= cd -- "$(dirname -- "$script")/.." && pwd)
+remote=https://github.com/okhomenko/bootstrap.git
+
+run() {
+  if [ "$dry_run" = true ]; then
+    # Single-quote each argument so paths with spaces are unambiguous.
+    for arg do
+      printf " '%s'" "$(printf '%s' "$arg" | sed "s/'/'\\\\''/g")"
+    done
+    printf '\n'
+  else
+    "$@"
+  fi
+}
+
+platform() {
+  case "$(uname -s)" in
+    Darwin) system_env=system-macos ;;
+    Linux)
+      command -v pacman >/dev/null 2>&1 || {
+        echo 'Platform commands support macOS and Arch Linux.' >&2; exit 1;
+      }
+      system_env=system-linux
+      ;;
+    *) echo 'Platform commands support macOS and Arch Linux.' >&2; exit 1 ;;
+  esac
+}
+
+packages() {
+  run "$mise_bin" -C "$repo_dir" -E "$system_env" bootstrap packages "$@"
+}
+
+tools() {
+  case "$1" in
+    list) run "$mise_bin" ls --global ;;
+    upgrade) run "$mise_bin" upgrade --global --prune ;;
+    prune) run "$mise_bin" prune --tools ;;
+  esac
+}
+
+# Ignore the caller's project configuration during user-level maintenance.
+cd "$HOME"
+
+case "$scope" in
+  update)
+    platform
+    run "$mise_bin" -E "$system_env" bootstrap --from "$remote" \
+      --from-dir "$repo_dir" --only packages --update
+    run "$mise_bin" bootstrap --from "$remote" --from-dir "$repo_dir" --update
+    ;;
+  upgrade)
+    platform
+    if [ "$system_env" = system-macos ]; then
+      run "$mise_bin" self-update --yes
+    fi
+    # Arch's declared pacman:mise package updates mise during this step.
+    packages upgrade
+    tools upgrade
+    ;;
+  platform)
+    platform
+    case "$action" in
+      list) packages status ;;
+      upgrade) packages upgrade ;;
+      prune)
+        if [ "$system_env" != system-macos ]; then
+          echo 'mise does not support platform prune for pacman/AUR.' >&2
+          exit 1
+        fi
+        packages prune --manager brew-cask
+        packages prune --manager brew
+        ;;
+    esac
+    ;;
+  tools) tools "$action" ;;
+esac
