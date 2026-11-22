@@ -3,8 +3,12 @@
 default = "skip"
 prompt = "Private bootstrap repository URL (skip = none)"
 
+[vars.chargebee_bootstrap_repo]
+default = "skip"
+prompt = "Chargebee bootstrap repository URL (skip = none)"
+
 [tasks.bootstrap]
-description = "Initialize LazyVim, then apply the private stage if one is configured"
+description = "Initialize LazyVim, then apply configured private stages"
 run = '''
 #!/bin/sh
 set -eu
@@ -14,8 +18,9 @@ if [ ! -e "$HOME/.config/nvim" ]; then
   rm -rf "$HOME/.config/nvim/.git"
 fi
 
-repo={{ vars.private_bootstrap_repo | quote }}
-[ "$repo" = skip ] && exit 0
+apply_private_repo() {
+repo=$1
+[ "$repo" = skip ] && return 0
 
 url="${repo%%\?*}"
 dir="$HOME/code/$(basename "$url" .git)"
@@ -35,6 +40,10 @@ fi
 {{ mise_bin | quote }} -E bootstrap bootstrap --from "$repo" --from-dir "$dir" \
   --only repos,dotfiles,mise-shell-activate,macos-defaults,macos-launchd-agents,linux-systemd-units,user,tools,task \
   --update --yes
+}
+
+apply_private_repo {{ vars.private_bootstrap_repo | quote }}
+apply_private_repo {{ vars.chargebee_bootstrap_repo | quote }}
 '''
 
 [bootstrap.repos]

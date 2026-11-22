@@ -53,11 +53,10 @@ mise bootstrap \
   --update --prompt-vars
 ~~~
 
-When prompted for the private bootstrap URL, mise saves the answer in its
-per-user state. To pass the URL without a prompt, save it first with
-`mise vars private_bootstrap_repo=https://github.com/okhomenko/config.git`.
-Check the stored value with `mise vars private_bootstrap_repo`. Future
-`bootstrap update` runs use that value to pull and apply the private repo.
+When prompted for the private repository URLs, mise saves each answer in its
+per-user state. To pass them without prompts, save them first with `mise vars`
+as shown under [Private stages](#private-stages). Future `bootstrap update`
+runs use those saved URLs to pull and apply both repositories.
 
 This applies Oh My Zsh, `~/.zshrc` (including SSH prompt), Git and SSH settings, Kitty, LazyVim, user runtime tools, and the login shell (`/bin/zsh`). No pacman or AUR packages are installed.
 
@@ -183,8 +182,8 @@ bootstrap tools prune                   # Remove unused tool versions
 ~~~
 
 `bootstrap update` fast-forwards the checkout that owns the installed script,
-then applies system packages and the full user bootstrap, including the private
-stage if configured. It installs missing packages; use `upgrade` to upgrade
+then applies system packages and the full user bootstrap, including configured
+private stages. It installs missing packages; use `upgrade` to upgrade
 installed packages. Local changes that prevent a fast-forward stop the update.
 
 `bootstrap upgrade` updates mise (`self-update` on macOS, pacman on Arch),
@@ -226,14 +225,14 @@ Use `--update` to fast-forward the local bootstrap checkout after a repository c
 
 `global.toml` is linked to `~/.config/mise/conf.d/bootstrap.toml` only when the `runtimes` environment is selected, so global runtime changes are opt-in and tools remain user-owned. The public repository contains no credentials or personal Git identity.
 
-## Private stage
+## Private stages
 
-When the answer is a Git URL, the `bootstrap` task ends by applying that
-repository:
+When the saved values are Git URLs, the `bootstrap` task ends by applying the
+personal `config` repository and then `config-cbee`:
 
 1. On the first run, it checks with `git ls-remote` that the repository is
    readable, and stops with a hint if not.
-2. It clones the repository into `~/code/<name>` (or fast-forwards an existing
+2. It clones each repository into `~/code/<name>` (or fast-forwards an existing
    checkout) and applies its `mise.bootstrap.toml`, restricted to user-level
    phases (no packages).
 
@@ -241,9 +240,11 @@ The private repository needs a `mise.bootstrap.toml` at its root, in the same
 format as this repository's `mise.toml`. Its user bootstrap skips package and system service phases. Put anything personal there, for
 example:
 
-- Git identity and optional overrides in `~/.config/git/private.gitconfig`,
-  which this repository's `~/.gitconfig` includes. Git ignores the include
-  while the file does not exist.
+- Personal Git identity and global hook settings in `config`'s
+  `~/.config/git/private.gitconfig`, which this repository's `~/.gitconfig`
+  includes. Git ignores the include while the file does not exist.
+- Chargebee Git credentials, identity, and signing settings in `config-cbee`,
+  included by the personal Git config when installed.
 - Environment variables in a file under `~/.config/mise/conf.d/`, so they apply
   in every directory.
 - SSH hosts as a block in `~/.ssh/config`.
@@ -253,8 +254,15 @@ For a private repository, **prefer HTTPS** and authenticate with native GitHub C
 ~~~sh
 gh auth login --hostname github.com --web --git-protocol https
 mise vars private_bootstrap_repo=https://github.com/okhomenko/config.git
+mise vars chargebee_bootstrap_repo=https://github.com/okhomenko/config-cbee.git
 mise bootstrap --from https://github.com/okhomenko/bootstrap.git --update
 ~~~
+
+`mise vars` stores both URLs outside the repositories. `--prompt-vars` also
+stores answers supplied interactively. Use `mise vars private_bootstrap_repo`
+and `mise vars chargebee_bootstrap_repo` to inspect them. Set either value to
+`skip` to omit that stage. Sign in to GitHub CLI for the Chargebee account
+before using its work remotes.
 
 An SSH URL remains supported, but requires an SSH key and agent with access to the repository. 1Password SSH agent integration is optional and independent of the GitHub CLI OAuth login.
 
@@ -265,7 +273,8 @@ connection does not stop at a host-key prompt.
 
 Edit the appropriate repository, commit, and push it to GitHub. Shared settings
 belong in `bootstrap`; personal Git identity and global hook settings belong
-in the private repository. Then apply the published versions:
+in `config`; Chargebee Git settings belong in `config-cbee`. Then apply the
+published versions:
 
 ~~~sh
 bootstrap update
@@ -273,15 +282,15 @@ git config --includes --show-origin --get user.name
 git config --includes --show-origin --get user.email
 ~~~
 
-`bootstrap update` fast-forwards the public checkout. Its private stage reads
-the saved `private_bootstrap_repo` value and fast-forwards that checkout before
-applying it. A checkout with uncommitted changes must be cleaned up before it
-can be updated.
+`bootstrap update` fast-forwards the public checkout. Its private stages read
+the saved repository URLs and fast-forward both checkouts before applying them.
+A checkout with uncommitted changes must be cleaned up before it can be updated.
 
 To change the answer later:
 
 ```sh
 mise vars private_bootstrap_repo=https://github.com/you/private.git
+mise vars chargebee_bootstrap_repo=https://github.com/you/work-config.git
 mise vars unset private_bootstrap_repo   # ask again on the next --prompt-vars run
 ```
 
