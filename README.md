@@ -11,6 +11,7 @@ bootstrap/
 ├── codex/tui.toml           # Codex TUI keys merged into existing config
 ├── claude/statusline.sh     # Claude Code status line script (symlinked)
 ├── claude/settings.json     # Claude settings keys merged into existing settings
+├── git/hooks/commit-msg     # Global Git co-author hook (symlinked)
 ├── herdr/keys.toml          # Herdr [keys] merged into existing config
 ├── scripts/bootstrap       # Installed as ~/.local/bin/bootstrap
 ├── mise.linux.toml          # Arch per-user config and login shell
@@ -135,6 +136,13 @@ On both macOS and Arch, `herdr/keys.toml` is merged into `~/.config/herdr/config
 setting the Herdr prefix to `ctrl+space` (Caps Lock is used as Esc, so the
 default `ctrl+b` is awkward). Other Herdr settings remain untouched. After
 applying, run `herdr server reload-config` to pick it up in a running server.
+
+## Git hooks
+
+The user bootstrap installs `git/hooks/commit-msg` in `~/.config/git/hooks`
+and sets Git's global `core.hooksPath` to that directory. The hook adds
+`Co-authored-by: Claude Fable 5.2 <noreply@anthropic.com>` to commit messages,
+unless the trailer is already present.
 
 ## GitHub URLs
 

@@ -44,6 +44,7 @@ fi
 "~/.codex/config.toml/tui" = { source = "codex/tui.toml", merge = true }
 "~/.claude/statusline.sh" = { source = "claude/statusline.sh", mode = "symlink" }
 "~/.claude/settings.json/bootstrap" = { source = "claude/settings.json", merge = true }
+"~/.config/git/hooks/commit-msg" = { source = "git/hooks/commit-msg", mode = "symlink" }
 # `mise bootstrap --from` ignores this repository's .miserc.toml, so enable
 # auto_env for the user too; later runs then load mise.<os>.toml.
 "~/.config/mise/miserc.toml" = { content = '''
@@ -95,6 +96,7 @@ github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+V
 [core]
     autocrlf = input
     editor = nvim
+    hooksPath = ~/.config/git/hooks
 
 [push]
     default = simple
