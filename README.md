@@ -228,8 +228,7 @@ Use `--update` to fast-forward the local bootstrap checkout after a repository c
 ## Config repositories
 
 When `config_repos` contains Git URLs, the `bootstrap` task applies each
-repository in the listed order. For example, install personal `config` first
-and `config-cbee` second:
+repository in the listed order:
 
 1. On the first run, it checks with `git ls-remote` that the repository is
    readable, and stops with a hint if not.
@@ -239,32 +238,31 @@ and `config-cbee` second:
 
 Each config repository needs a `mise.bootstrap.toml` at its root, in the same
 format as this repository's `mise.toml`. Its bootstrap skips package and
-system service phases. Put account-specific settings there, for example:
+system service phases. See the public
+[config-example](https://github.com/okhomenko/config-example) repository for a
+starting point. Config repositories can contain, for example:
 
-- Personal Git identity and global hook settings in `config`'s
-  `~/.config/git/private.gitconfig`, which this repository's `~/.gitconfig`
-  includes. Git ignores the include while the file does not exist.
-- Chargebee Git credentials, identity, and signing settings in `config-cbee`,
-  included by the personal Git config when installed.
+- Git identity and hook settings in `~/.config/git/private.gitconfig`, which
+  this repository's `~/.gitconfig` includes. Git ignores the include while the
+  file does not exist.
+- Additional Git settings in a separate repository, included by the first
+  repository's Git config when installed.
 - Environment variables in a file under `~/.config/mise/conf.d/`, so they apply
   in every directory.
 - SSH hosts as a block in `~/.ssh/config`.
 
-For a private repository, **prefer HTTPS** and authenticate with native GitHub CLI before bootstrap:
+For private GitHub repositories, authenticate with GitHub CLI before bootstrap:
 
 ~~~sh
 gh auth login --hostname github.com --web --git-protocol https
-mise vars config_repos='https://github.com/okhomenko/config.git,https://github.com/okhomenko/config-cbee.git'
+mise vars config_repos='https://github.com/you/config-base.git,https://github.com/you/config-extra.git'
 mise bootstrap --from https://github.com/okhomenko/bootstrap.git --update
 ~~~
 
 `mise vars` stores the list outside the repositories. `--prompt-vars` also
 stores an answer supplied interactively. Use `mise vars config_repos` to
 inspect or replace the list; set it to `skip` to apply no config repositories.
-Sign in to GitHub CLI for the Chargebee account before using its work remotes.
-On older installations, the first update combines the saved
-`private_bootstrap_repo` and `chargebee_bootstrap_repo` values into
-`config_repos`, saves the new list, and removes the former saved values.
+Each configured repository can use its own access method and Git settings.
 
 An SSH URL remains supported, but requires an SSH key and agent with access to the repository. 1Password SSH agent integration is optional and independent of the GitHub CLI OAuth login.
 
@@ -273,10 +271,9 @@ connection does not stop at a host-key prompt.
 
 ## Change and reapply configuration
 
-Edit the appropriate repository, commit, and push it to GitHub. Shared settings
-belong in `bootstrap`; personal Git identity and global hook settings belong
-in `config`; Chargebee Git settings belong in `config-cbee`. Then apply the
-published versions:
+Edit the appropriate repository, commit, and push it to GitHub. Shared setup
+belongs in `bootstrap`; account-specific settings belong in config
+repositories. Then apply the published versions:
 
 ~~~sh
 bootstrap update
@@ -291,7 +288,7 @@ A checkout with uncommitted changes must be cleaned up before it can be updated.
 To change the answer later:
 
 ```sh
-mise vars config_repos='https://github.com/you/personal.git,https://github.com/you/work.git'
+mise vars config_repos='https://github.com/you/config-base.git,https://github.com/you/config-extra.git'
 mise vars config_repos=skip
 mise vars unset config_repos   # ask again with --prompt-vars on a new setup
 ```

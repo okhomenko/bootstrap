@@ -1,16 +1,10 @@
-# Save an ordered, comma-separated list. Existing installs fall back to the
-# two former vars until config_repos is explicitly set.
+# Save an ordered, comma-separated list of user configuration repositories.
 [vars.config_repos]
-default = "legacy"
+default = "skip"
 prompt = "Config repository URLs, comma separated (skip = none)"
 
-[vars.private_bootstrap_repo]
-default = "skip"
-[vars.chargebee_bootstrap_repo]
-default = "skip"
-
 [tasks.bootstrap]
-description = "Initialize LazyVim, then apply configured private stages"
+description = "Initialize LazyVim, then apply configured repositories"
 run = '''
 #!/bin/sh
 set -eu
@@ -45,19 +39,6 @@ fi
 }
 
 repos={{ vars.config_repos | quote }}
-if [ "$repos" = legacy ]; then
-  repos=
-  for legacy_repo in {{ vars.private_bootstrap_repo | quote }} {{ vars.chargebee_bootstrap_repo | quote }}; do
-    [ "$legacy_repo" = skip ] && continue
-    [ -z "$repos" ] || repos="$repos,"
-    repos="$repos$legacy_repo"
-  done
-  if [ -n "$repos" ]; then
-    {{ mise_bin | quote }} vars "config_repos=$repos"
-    {{ mise_bin | quote }} vars unset private_bootstrap_repo chargebee_bootstrap_repo
-  fi
-fi
-
 [ "$repos" = skip ] && exit 0
 
 case "$repos" in
